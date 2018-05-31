@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,7 +68,7 @@ public class CROSSRecSimilarityCalculator implements IAggregatedSimilarityCalcul
 			try {
 				Map<String, Double> map = computeWeightCosineSimilarity(deps);
 				for (Map.Entry<String, Double> entry : map.entrySet()){
-				    result.put(artifact.getFullName(), artifactRepository.findOne(entry.getKey()).getFullName(), entry.getValue());
+				    result.put(artifact.getFullName(), artifactRepository.findById(entry.getKey()).get().getFullName(), entry.getValue());
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
@@ -123,10 +124,10 @@ public class CROSSRecSimilarityCalculator implements IAggregatedSimilarityCalcul
 		
 		
 		for (String artifactName : extractProjectsfromGraph(bigGraph)) {
-			Artifact artifact = artifactRepository.findOne(artifactName);
-			if(artifact != null) {
+			Optional<Artifact> artifact = artifactRepository.findById(artifactName);
+			if(artifact.isPresent()) {
 				Set<String> specificLibs = new HashSet<String>();
-				for (String string : artifact.getDependencies()) {
+				for (String string : artifact.get().getDependencies()) {
 					specificLibs.add(("#DEP#" + string).replace(".", "_")); 
 				}
 				List<String> libSet = new ArrayList<>(Sets.union(specificLibs, queryLibs));
@@ -150,7 +151,7 @@ public class CROSSRecSimilarityCalculator implements IAggregatedSimilarityCalcul
 				}
 				/*Using Cosine Similarity*/
 				val = cosineSimilarity(vector1,vector2);					
-				sim.put(artifact.getId(), val);		
+				sim.put(artifact.get().getId(), val);		
 			}
 		}												
 		return sim;

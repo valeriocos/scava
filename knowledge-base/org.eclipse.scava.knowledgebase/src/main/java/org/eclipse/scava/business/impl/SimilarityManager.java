@@ -192,7 +192,7 @@ public class SimilarityManager implements ISimilarityManager {
 	public void deleteRelations(ISimilarityCalculator simCalculator) {
 		Query q2 = new Query(Criteria.where("type.name").is(simCalculator.getSimilarityName()));
 		List<Relation> arts = mongoOperations.find(q2, Relation.class);
-		relationRepository.delete(arts);
+		relationRepository.deleteAll(arts);
 
 	}
 
@@ -216,10 +216,10 @@ public class SimilarityManager implements ISimilarityManager {
 		for (Relation rel : r1) {
 			if (rel.getFromProject().getId().equals(prj1.getId()))
 				//results.add(rel.getToProject());
-				results.add(artifactRepository.findOne(rel.getToProject().getId()));
+				results.add(artifactRepository.findById(rel.getToProject().getId()).get());
 			else
 				//results.add(rel.getFromProject());
-				results.add(artifactRepository.findOne(rel.getFromProject().getId()));
+				results.add(artifactRepository.findById(rel.getFromProject().getId()).get());
 		}
 		return results;
 	}

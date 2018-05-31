@@ -66,7 +66,7 @@ public class DependencyServiceTest {
 		Resource resource = new ClassPathResource("artifacts.json");
 		InputStream resourceInputStream = resource.getInputStream();
 		artifacts = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-		artifactRepository.save(artifacts);
+		artifactRepository.saveAll(artifacts);
 		resourceInputStream.close();
 	}
 	@After

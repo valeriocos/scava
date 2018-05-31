@@ -68,7 +68,7 @@ public class RepoPalStarSimilarityCalculatorTest {
 			Resource resource = new ClassPathResource("artifacts.json");
 			InputStream resourceInputStream = resource.getInputStream();
 			List<Artifact> myObjects = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-			artifactRepository.save(myObjects);
+			artifactRepository.saveAll(myObjects);
 			for (Artifact artifact : myObjects) {
 				ossmeterImporter.storeGithubUser(artifact.getStarred(), artifact.getFullName());
 				ossmeterImporter.storeGithubUserCommitter(artifact.getCommitteers(), artifact.getFullName());

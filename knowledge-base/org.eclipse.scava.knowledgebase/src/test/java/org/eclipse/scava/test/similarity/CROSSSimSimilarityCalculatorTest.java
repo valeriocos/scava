@@ -13,7 +13,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class CROSSSimSimilarityCalculatorTest {
 			Resource resource = new ClassPathResource("artifacts.json");
 			InputStream resourceInputStream = resource.getInputStream();
 			artifacts = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-			artifactRepository.save(artifacts);
+			artifactRepository.saveAll(artifacts);
 			for (Artifact artifact : artifacts) {
 				ossmeterImporter.storeGithubUser(artifact.getStarred(), artifact.getFullName());
 				ossmeterImporter.storeGithubUserCommitter(artifact.getCommitteers(), artifact.getFullName());

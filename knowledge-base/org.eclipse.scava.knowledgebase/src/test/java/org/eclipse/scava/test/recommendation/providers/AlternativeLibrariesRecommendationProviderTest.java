@@ -85,7 +85,7 @@ public class AlternativeLibrariesRecommendationProviderTest {
 			Resource resource = new ClassPathResource("artifacts.json");
 			InputStream resourceInputStream = resource.getInputStream();
 			artifacts = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-			artifactRepository.save(artifacts);
+			artifactRepository.saveAll(artifacts);
 			resourceInputStream.close();
 			similarityManager.createAndStoreDistanceMatrix(simDependencyCalculator);
 			assertEquals(((artifacts.size() * (artifacts.size() -1))/2), 

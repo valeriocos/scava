@@ -67,7 +67,7 @@ public class RecommenderManagerTest {
 			Resource resource = new ClassPathResource("artifacts.json");
 			InputStream resourceInputStream = resource.getInputStream();
 			artifacts = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-			artifactRepository.save(artifacts);
+			artifactRepository.saveAll(artifacts);
 			for (Artifact artifact : artifacts) {
 				ossmeterImporter.storeGithubUser(artifact.getStarred(), artifact.getFullName());
 				ossmeterImporter.storeGithubUserCommitter(artifact.getCommitteers(), artifact.getFullName());

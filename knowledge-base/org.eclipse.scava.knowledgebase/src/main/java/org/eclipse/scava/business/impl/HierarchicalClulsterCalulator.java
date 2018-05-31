@@ -52,7 +52,7 @@ public class HierarchicalClulsterCalulator implements IClusterCalculator {
 			Cluster clu = new Cluster();
 			clu.setArtifacts(new ArrayList<Artifact>());
 			getLeaf(cluster).forEach(z ->
-					clu.getArtifacts().add(arifactRepository.findOne(z)));
+					clu.getArtifacts().add(arifactRepository.findById(z).get()));
 			result.add(clu);
 		}
 		return result;
@@ -67,7 +67,7 @@ public class HierarchicalClulsterCalulator implements IClusterCalculator {
 			Cluster clu = new Cluster();
 			clu.setArtifacts(new ArrayList<Artifact>());
 			getLeaf(cluster).forEach(z ->
-					clu.getArtifacts().add(arifactRepository.findOne(z)));
+					clu.getArtifacts().add(arifactRepository.findById(z).get()));
 			result.add(clu);
 		}
 		return result;

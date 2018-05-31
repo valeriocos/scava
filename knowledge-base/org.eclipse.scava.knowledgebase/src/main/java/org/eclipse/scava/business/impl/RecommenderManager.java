@@ -88,7 +88,7 @@ public class RecommenderManager implements IRecommenderManager {
 
 	@Override
 	public List<Artifact> getSimilarProjects(String projectId, String similarityFunction, int numOfResult) {
-		Artifact p1 = artifactRepository.findOne(projectId);
+		Artifact p1 = artifactRepository.findById(projectId).get();
 		try {
 			return similarityManager.getSimilarProjects(p1, getSimilarityCalculator(similarityFunction), numOfResult);
 		} catch (Exception e) {

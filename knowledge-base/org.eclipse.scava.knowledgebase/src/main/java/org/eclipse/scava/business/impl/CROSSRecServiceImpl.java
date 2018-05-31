@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -124,9 +125,11 @@ public class CROSSRecServiceImpl {
 		Set<String> libraries = new HashSet<String>();
 		//Prendere le libreria per ogni progetto nel set									
 		for(String key: keySet) {				
-			Artifact art = artifactRepository.findOne(key);
-			allNeighbourLibs.put(key, new HashSet<String>(art.getDependencies()));
-			libraries.addAll(art.getDependencies());
+			Optional<Artifact> art = artifactRepository.findById(key);
+			if(art.isPresent()) {
+				allNeighbourLibs.put(key, new HashSet<String>(art.get().getDependencies()));
+				libraries.addAll(art.get().getDependencies());
+			}
 		}
 		allNeighbourLibs.put("currentProject", depsStringSet);
 		/*The list of all libraries from the training projects and the testing project*/

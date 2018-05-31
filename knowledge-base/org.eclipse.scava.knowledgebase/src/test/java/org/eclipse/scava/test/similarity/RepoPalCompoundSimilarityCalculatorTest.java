@@ -13,13 +13,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.eclipse.scava.Application;
-import org.eclipse.scava.business.IAggregatedSimilarityCalculator;
 import org.eclipse.scava.business.ISingleSimilarityCalculator;
 import org.eclipse.scava.business.impl.OssmeterImporter;
 import org.eclipse.scava.business.integration.ArtifactRepository;
@@ -41,7 +38,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Table;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { Application.class, SwaggerConfig.class })
@@ -71,7 +67,7 @@ public class RepoPalCompoundSimilarityCalculatorTest {
 			Resource resource = new ClassPathResource("artifacts.json");
 			InputStream resourceInputStream = resource.getInputStream();
 			List<Artifact> myObjects = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-			artifactRepository.save(myObjects);
+			artifactRepository.saveAll(myObjects);
 			for (Artifact artifact : myObjects) {
 				ossmeterImporter.storeGithubUser(artifact.getStarred(), artifact.getFullName());
 				ossmeterImporter.storeGithubUserCommitter(artifact.getCommitteers(), artifact.getFullName());

@@ -61,10 +61,10 @@ public class AlternativeLibrariesRecommendationProvider implements IRecommendati
 		ISimilarityCalculator simCalc = getSimilarityCalculator(query.getSimilarityMethod());
 		for (Dependency dependency : query.getProjectDependencies()) {
 			try{
-				Artifact current = artifactRepository.findOne(dependency.getArtifactID());
-				if(current != null){
+				Optional<Artifact> current = artifactRepository.findById(dependency.getArtifactID());
+				if(current.isPresent()){
 					List<Artifact> similarProjects = similarityManager.getSimilarProjects(
-							current, simCalc, 
+							current.get(), simCalc, 
 							NUMBER_OF_RESULT);
 					for (Artifact artifact : similarProjects) {
 						RecommendationItem ri = new RecommendationItem();

@@ -9,8 +9,6 @@
  ******************************************************************************/
 package org.eclipse.scava.test.crossrec;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
@@ -73,7 +71,7 @@ public class CROSSRECTest {
 		Resource resource = new ClassPathResource("artifacts.json");
 		InputStream resourceInputStream = resource.getInputStream();
 		artifacts = mapper.readValue(resourceInputStream, new TypeReference<List<Artifact>>(){});
-		artifactRepository.save(artifacts);
+		artifactRepository.saveAll(artifacts);
 	}
 	
 
