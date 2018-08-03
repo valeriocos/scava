@@ -18,9 +18,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import sparkle.Sparkle;
-import sparkle.dimensions.DateDimension;
-import sparkle.dimensions.LinearDimension;
+import src.sparkle.Sparkle;
+import src.sparkle.dimensions.DateDimension;
+import src.sparkle.dimensions.LinearDimension;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

@@ -1,0 +1,23 @@
+package org.eclipse.scava.metricprovider.trans.textpreprocessing.model;
+
+@db(qualifiedCollectionNames="true")
+@customize
+class TextpreprocessingTransMetric {
+	val BugTrackerCommentsTextPreprocessing[*] bugTrackerComments;
+	val NewsgroupArticlesTextPreprocessing[*] newsgroupArticles;
+}
+
+class BugTrackerCommentsTextPreprocessing {
+	@searchable
+   	attr String bugTrackerId;
+   	attr String bugId;
+   	attr String commentId;
+	attr String[*] plainText;
+}
+
+class NewsgroupArticlesTextPreprocessing {
+	@searchable
+   	attr String newsGroupName;
+   	attr int articleNumber;
+   	attr String[*] plainText;
+}

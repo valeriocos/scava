@@ -1,4 +1,4 @@
-package sparkle.scales;
+package src.sparkle.scales;
 
 import java.util.Date;
 

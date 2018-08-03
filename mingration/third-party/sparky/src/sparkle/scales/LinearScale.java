@@ -1,4 +1,4 @@
-package sparkle.scales;
+package src.sparkle.scales;
 public class LinearScale extends Scale<Double> {
 		
 	public LinearScale(double maxDomain, double minDomain, double maxRange, double minRange) {

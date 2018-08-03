@@ -11,3 +11,4 @@ Require-Bundle: com.googlecode.pongo.runtime.dependencies,
  com.googlecode.pongo.runtime,
  org.eclipse.scava.repository.model
 Export-Package: org.eclipse.scava.repository.model.github
+Automatic-Module-Name: org.eclipse.scava.repository.model.github

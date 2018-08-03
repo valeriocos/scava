@@ -1,4 +1,4 @@
-package sparkle.scales;
+package src.sparkle.scales;
 
 public abstract class Scale<T> {
 	

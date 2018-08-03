@@ -96,8 +96,8 @@ public class CommentsTransMetricProvider implements ITransientMetricProvider<Bug
 			bugTrackerData.setNumberOfComments(numberOfComments);
 			int cumulativeNumberOfComments = bugTrackerData.getCumulativeNumberOfComments();
 			bugTrackerData.setCumulativeNumberOfComments(cumulativeNumberOfComments + numberOfComments);
-//			System.out.println("bugTrackingSystemDelta.getComments().size(): " + 
-//								bugTrackingSystemDelta.getComments().size());
+			System.out.println("bugTrackingSystemDelta.getComments().size(): " + 
+								bugTrackingSystemDelta.getComments().size());
 			db.sync();
 		}
 	}

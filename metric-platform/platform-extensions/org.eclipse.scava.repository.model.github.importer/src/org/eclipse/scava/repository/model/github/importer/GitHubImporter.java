@@ -404,13 +404,13 @@ public class GitHubImporter implements IImporter{
 			repository.getBugTrackingSystems().clear();
 			if (projectId.split("/").length == 2)
 			{
-				GitHubBugTracker bt;
-				bt = new GitHubBugTracker();
-				bt.setUrl("https://api.github.com/repos/" + projectId + "/issues");
+				GitHubBugTracker bt;				
 				String user = projectId.split("/")[0];
 				String repo = projectId.split("/")[1];
-				bt.setUser(user);
-				bt.setRepository(repo);
+				//Adri�n Why to do that?
+				bt = new GitHubBugTracker();
+				bt.setProject(user, repo);
+				bt.setUrl("https://api.github.com/repos/" + projectId + "/issues");
 				repository.getBugTrackingSystems().add(bt);
 			}
 			

@@ -303,18 +303,17 @@ public class TopicsTransMetricProvider  implements ITransientMetricProvider<Topi
 	@Override
 	public String getShortIdentifier() {
 		// TODO Auto-generated method stub
-		return "requestreplyclassification";
+		return "topics";
 	}
 
 	@Override
 	public String getFriendlyName() {
-		return "Request Reply Classification";
+		return "Topics";
 	}
 
 	@Override
 	public String getSummaryInformation() {
-		return "This metric computes if each bug comment or newsgroup article is a " +
-				"request of a reply.";
+		return "This metric computes the topics found and the number of documents that uses specific topics.";
 	}
 
 }

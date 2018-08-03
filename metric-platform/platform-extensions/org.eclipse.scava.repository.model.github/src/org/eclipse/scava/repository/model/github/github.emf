@@ -90,6 +90,7 @@ class GitHubBugTracker extends BugTrackingSystem {
   attr String repository;
   attr String login;
   attr String password;
+  attr String owner;
   val GitHubIssue[*] issues;
 }
 

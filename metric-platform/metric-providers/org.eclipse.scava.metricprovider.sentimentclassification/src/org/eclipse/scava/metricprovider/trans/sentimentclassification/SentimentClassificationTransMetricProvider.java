@@ -9,10 +9,14 @@
  ******************************************************************************/
 package org.eclipse.scava.metricprovider.trans.sentimentclassification;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentsDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticlesDetectingCode;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.model.BugTrackerCommentsData;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesData;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.model.SentimentClassificationTransMetric;
@@ -20,15 +24,8 @@ import org.eclipse.scava.platform.IMetricProvider;
 import org.eclipse.scava.platform.ITransientMetricProvider;
 import org.eclipse.scava.platform.MetricProviderContext;
 import org.eclipse.scava.platform.delta.ProjectDelta;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemComment;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemDelta;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemProjectDelta;
 import org.eclipse.scava.platform.delta.bugtrackingsystem.PlatformBugTrackingSystemManager;
-import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelArticle;
-import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelDelta;
-import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelProjectDelta;
 import org.eclipse.scava.platform.delta.communicationchannel.PlatformCommunicationChannelManager;
-import org.eclipse.scava.repository.model.BugTrackingSystem;
 import org.eclipse.scava.repository.model.CommunicationChannel;
 import org.eclipse.scava.repository.model.Project;
 import org.eclipse.scava.repository.model.cc.nntp.NntpNewsGroup;
@@ -43,6 +40,9 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 
 	protected PlatformBugTrackingSystemManager platformBugTrackingSystemManager;
 	protected PlatformCommunicationChannelManager communicationChannelManager;
+	
+	protected List<IMetricProvider> uses;
+	protected MetricProviderContext context;
 
 	@Override
 	public String getIdentifier() {
@@ -60,18 +60,20 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 
 	@Override
 	public void setUses(List<IMetricProvider> uses) {
-		// DO NOTHING -- we don't use anything
+		this.uses=uses;
 	}
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
-		return Collections.emptyList();
+		//return Collections.emptyList();
+		return Arrays.asList(DetectingCodeTransMetricProvider.class.getCanonicalName());
 	}
 
 	@Override
 	public void setMetricProviderContext(MetricProviderContext context) {
 		this.platformBugTrackingSystemManager = context.getPlatformBugTrackingSystemManager();
 		this.communicationChannelManager = context.getPlatformCommunicationChannelManager();
+		this.context = context;
 	}
 
 	@Override
@@ -84,107 +86,85 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 							SentimentClassificationTransMetric db) {
 		final long startTime = System.currentTimeMillis();
 		long previousTime = startTime;
-		System.err.println("Started " + getIdentifier());
-
-		BugTrackingSystemProjectDelta btspDelta = projectDelta.getBugTrackingSystemDelta();
 		clearDB(db);
-    	Classifier classifier = new Classifier();
-		for (BugTrackingSystemDelta bugTrackingSystemDelta : btspDelta.getBugTrackingSystemDeltas()) {
-			BugTrackingSystem bugTracker = bugTrackingSystemDelta.getBugTrackingSystem();
-			for (BugTrackingSystemComment comment: bugTrackingSystemDelta.getComments()) {
-				BugTrackerCommentsData commentsData = findBugTrackerComment(db, bugTracker, comment);
-				if (commentsData == null) {
-					commentsData = new BugTrackerCommentsData();
-					commentsData.setBugTrackerId(bugTracker.getOSSMeterId());
-					commentsData.setBugId(comment.getBugId());
-					commentsData.setCommentId(comment.getCommentId());
-					db.getBugTrackerComments().add(commentsData);
-				} 
-				ClassificationInstance classificationInstance = prepareBugTrackerCommentInstance(bugTracker, comment);
-		        classifier.add(classificationInstance);
+		System.err.println("Started " + getIdentifier());
+		Classifier classifier = new Classifier();
+		
+		DetectingCodeTransMetric detectingCodeMetric = ((DetectingCodeTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		Iterable<BugTrackerCommentsDetectingCode> commentsIt = detectingCodeMetric.getBugTrackerComments();
+		
+		for(BugTrackerCommentsDetectingCode comment : commentsIt)
+		{
+			BugTrackerCommentsData commentInSentiment = findBugTrackerComment(db, comment);
+			if(commentInSentiment == null)
+			{
+				commentInSentiment = new BugTrackerCommentsData();
+				commentInSentiment.setBugTrackerId(comment.getBugTrackerId());
+				commentInSentiment.setBugId(comment.getBugId());
+				commentInSentiment.setCommentId(comment.getCommentId());
+				db.getBugTrackerComments().add(commentInSentiment);
 			}
 			db.sync();
+			ClassificationInstance classificationInstance = prepareBugTrackerCommentInstance(comment);
+			classifier.add(classificationInstance);
 		}
 		
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
 										"prepared bug comments");
 		
-		CommunicationChannelProjectDelta ccpDelta = projectDelta.getCommunicationChannelDelta();
-		for ( CommunicationChannelDelta communicationChannelDelta: ccpDelta.getCommunicationChannelSystemDeltas()) {
-			CommunicationChannel communicationChannel = communicationChannelDelta.getCommunicationChannel();
-			String communicationChannelName;
-			if (!(communicationChannel instanceof NntpNewsGroup))
-				communicationChannelName = communicationChannel.getUrl();
-			else {
-				NntpNewsGroup newsgroup = (NntpNewsGroup) communicationChannel;
-				communicationChannelName = newsgroup.getNewsGroupName();
-			}
-			for (CommunicationChannelArticle article: communicationChannelDelta.getArticles()) {
-				NewsgroupArticlesData newsgroupArticlesData = 
-						findNewsgroupArticle(db, communicationChannelName, article);
-				if (newsgroupArticlesData == null) {
-					newsgroupArticlesData = new NewsgroupArticlesData();
-					newsgroupArticlesData.setNewsGroupName(communicationChannelName);
-					newsgroupArticlesData.setArticleNumber(article.getArticleNumber());
-					db.getNewsgroupArticles().add(newsgroupArticlesData);
-				} 
-				ClassificationInstance classificationInstance = 
-						prepareNewsgroupArticleInstance(communicationChannelName, article);
-				classifier.add(classificationInstance);
+		Iterable<NewsgroupArticlesDetectingCode> articlesIt = detectingCodeMetric.getNewsgroupArticles();
+		
+		for(NewsgroupArticlesDetectingCode article : articlesIt)
+		{
+			NewsgroupArticlesData articleInSentiment = findNewsgroupArticle(db, article);
+			if(articleInSentiment == null)
+			{
+				articleInSentiment = new NewsgroupArticlesData();
+				articleInSentiment.setNewsGroupName(article.getNewsGroupName());
+				articleInSentiment.setArticleNumber(article.getArticleNumber());
+				db.getNewsgroupArticles().add(articleInSentiment);
 			}
 			db.sync();
+			ClassificationInstance classificationInstance = prepareNewsgroupArticleInstance(article);
+			classifier.add(classificationInstance);
 		}
 		
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
-										"prepared newsgroup articles");
-
+				"prepared newsgroup articles");
+		
 		classifier.classify();
 
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
 										"classifier.classify() finished");
-
-		for (BugTrackingSystemDelta bugTrackingSystemDelta : btspDelta.getBugTrackingSystemDeltas()) {
-			BugTrackingSystem bugTracker = bugTrackingSystemDelta.getBugTrackingSystem();
-			for (BugTrackingSystemComment comment: bugTrackingSystemDelta.getComments()) {
-				BugTrackerCommentsData bugTrackerCommentsData = 
-						findBugTrackerComment(db, bugTracker, comment);
-				ClassificationInstance classificationInstance = 
-						prepareBugTrackerCommentInstance(bugTracker, comment);
-				String classificationResult = classifier.getClassificationResult(classificationInstance);
-				bugTrackerCommentsData.setClassificationResult(classificationResult);
-				String emotionalDimensions = EmotionalDimensions.getDimensions(classificationInstance);
-				bugTrackerCommentsData.setEmotionalDimensions(emotionalDimensions);
-			}
+		
+		for(BugTrackerCommentsDetectingCode comment : commentsIt)
+		{
+			BugTrackerCommentsData commentInSentiment = findBugTrackerComment(db, comment);
+			ClassificationInstance classificationInstance = prepareBugTrackerCommentInstance(comment);
+			String classificationResult = classifier.getClassificationResult(classificationInstance);
+			commentInSentiment.setClassificationResult(classificationResult);
+			String emotionalDimensions = EmotionalDimensions.getDimensions(classificationInstance);
+			commentInSentiment.setEmotionalDimensions(emotionalDimensions);
 			db.sync();
 		}
 
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
 										"stored classified bug comments");
-
-		for ( CommunicationChannelDelta communicationChannelDelta: ccpDelta.getCommunicationChannelSystemDeltas()) {
-			CommunicationChannel communicationChannel = communicationChannelDelta.getCommunicationChannel();
-			String communicationChannelName;
-			if (!(communicationChannel instanceof NntpNewsGroup))
-				communicationChannelName = communicationChannel.getUrl();
-			else {
-				NntpNewsGroup newsgroup = (NntpNewsGroup) communicationChannel;
-				communicationChannelName = newsgroup.getNewsGroupName();
-			}
-			for (CommunicationChannelArticle article: communicationChannelDelta.getArticles()) {
-				NewsgroupArticlesData newsgroupArticlesData = 
-						findNewsgroupArticle(db, communicationChannelName, article);
-				ClassificationInstance classificationInstance = 
-						prepareNewsgroupArticleInstance(communicationChannelName, article);
-				String classificationResult = classifier.getClassificationResult(classificationInstance);
-				newsgroupArticlesData.setClassificationResult(classificationResult);
-				String emotionalDimensions = EmotionalDimensions.getDimensions(classificationInstance);
-				newsgroupArticlesData.setEmotionalDimensions(emotionalDimensions);
-			}
+		
+		for(NewsgroupArticlesDetectingCode article : articlesIt)
+		{
+			NewsgroupArticlesData articleInSentiment = findNewsgroupArticle(db, article);
+			ClassificationInstance classificationInstance = prepareNewsgroupArticleInstance(article);
+			String classificationResult = classifier.getClassificationResult(classificationInstance);
+			articleInSentiment.setClassificationResult(classificationResult);
+			String emotionalDimensions = EmotionalDimensions.getDimensions(classificationInstance);
+			articleInSentiment.setEmotionalDimensions(emotionalDimensions);
 			db.sync();
 		}
+		
+		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
+				"stored classified Newsgroup articles");
 
-//		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
-//										"stored classified newsgroup articles");
  	}
 	
 	private long printTimeMessage(long startTime, long previousTime, int size, String message) {
@@ -198,54 +178,60 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 	private String time(long timeInMS) {
 		return DurationFormatUtils.formatDuration(timeInMS, "HH:mm:ss,SSS");
 	}
-
-	private ClassificationInstance prepareBugTrackerCommentInstance(BugTrackingSystem bugTracker,
-			BugTrackingSystemComment comment) {
+	
+	private ClassificationInstance prepareBugTrackerCommentInstance(BugTrackerCommentsDetectingCode comment)
+	{
     	ClassificationInstance classificationInstance = new ClassificationInstance();
-        classificationInstance.setBugTrackerId(bugTracker.getOSSMeterId());
+        classificationInstance.setBugTrackerId(comment.getBugTrackerId());
         classificationInstance.setBugId(comment.getBugId());
         classificationInstance.setCommentId(comment.getCommentId());
         
-        if (comment.getText() == null) {
+        if (comment.getNaturalLanguage() == null) {
         	classificationInstance.setText("");
         } else {
-        	classificationInstance.setText(comment.getText());
+        	classificationInstance.setText(comment.getNaturalLanguage());
         }
-        
         return classificationInstance;
 	}
+	
+	
 
-	private ClassificationInstance prepareNewsgroupArticleInstance(
-			String communicationChannelName, CommunicationChannelArticle article) {
+	private ClassificationInstance prepareNewsgroupArticleInstance(NewsgroupArticlesDetectingCode  article)
+	{
     	ClassificationInstance classificationInstance = new ClassificationInstance();
-        classificationInstance.setNewsgroupName(communicationChannelName);
+        classificationInstance.setNewsgroupName(article.getNewsGroupName());
         classificationInstance.setArticleNumber(article.getArticleNumber());
-        classificationInstance.setSubject(article.getSubject());
-        classificationInstance.setText(article.getText());
+        //classificationInstance.setSubject(article.getSubject()); //Is it really necessary?
+        if(article.getNaturalLanguage() == null)
+        {
+        	classificationInstance.setText("");
+        }
+        else
+        {
+        	classificationInstance.setText(article.getNaturalLanguage());
+        }
         return classificationInstance;
 	}
-
-	private BugTrackerCommentsData findBugTrackerComment(SentimentClassificationTransMetric db, 
-								BugTrackingSystem bugTracker, BugTrackingSystemComment comment) {
+	
+	private BugTrackerCommentsData findBugTrackerComment(SentimentClassificationTransMetric db, BugTrackerCommentsDetectingCode comment)
+	{
 		BugTrackerCommentsData bugTrackerCommentsData = null;
 		Iterable<BugTrackerCommentsData> bugTrackerCommentsDataIt = 
-				db.getBugTrackerComments().
-						find(BugTrackerCommentsData.BUGTRACKERID.eq(bugTracker.getOSSMeterId()), 
-								BugTrackerCommentsData.BUGID.eq(comment.getBugId()),
-								BugTrackerCommentsData.COMMENTID.eq(comment.getCommentId()));
+		db.getBugTrackerComments().
+			find(BugTrackerCommentsData.BUGID.eq(comment.getBugId()),
+					BugTrackerCommentsData.COMMENTID.eq(comment.getCommentId()));
 		for (BugTrackerCommentsData bcd:  bugTrackerCommentsDataIt) {
 			bugTrackerCommentsData = bcd;
 		}
 		return bugTrackerCommentsData;
 	}
-	
 
-	private NewsgroupArticlesData findNewsgroupArticle(SentimentClassificationTransMetric db, 
-							String communicationChannelName, CommunicationChannelArticle article) {
+	private NewsgroupArticlesData findNewsgroupArticle(SentimentClassificationTransMetric db, NewsgroupArticlesDetectingCode article)
+	{
 		NewsgroupArticlesData newsgroupArticlesData = null;
 		Iterable<NewsgroupArticlesData> newsgroupArticlesDataIt = 
 				db.getNewsgroupArticles().
-						find(NewsgroupArticlesData.NEWSGROUPNAME.eq(communicationChannelName), 
+						find(NewsgroupArticlesData.NEWSGROUPNAME.eq(article.getNewsGroupName()), 
 								NewsgroupArticlesData.ARTICLENUMBER.eq(article.getArticleNumber()));
 		for (NewsgroupArticlesData nad:  newsgroupArticlesDataIt) {
 			newsgroupArticlesData = nad;
@@ -259,12 +245,12 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 
 	@Override
 	public String getShortIdentifier() {
-		return "requestreplyclassification";
+		return "sentimentclassification";
 	}
 
 	@Override
 	public String getFriendlyName() {
-		return "Request Reply Classification";
+		return "Sentiment Classification";
 	}
 
 	@Override

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.scava.platform.metricprovider">
+         <metricProvider provider="org.eclipse.scava.metricprovider.trans.textpreprocessing.TextPreprocessingTransMetricProvider">
+   		</metricProvider>
+   </extension>
+   <extension
+         point="com.googlecode.pongo.runtime.osgi">
+     <class name="org.eclipse.scava.metricprovider.trans.textpreprocessing.model.TextpreprocessingTransMetric"/>
+     <class name="org.eclipse.scava.metricprovider.trans.textpreprocessing.model.BugTrackerCommentsTextPreprocessing"/>
+     <class name="org.eclipse.scava.metricprovider.trans.textpreprocessing.model.NewsgroupArticlesTextPreprocessing"/>
+   </extension>
+
+</plugin>

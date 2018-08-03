@@ -1,4 +1,4 @@
-package sparkle;
+package src.sparkle;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -17,9 +17,9 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import sparkle.dimensions.DateDimension;
-import sparkle.dimensions.LinearDimension;
-import sparkle.dimensions.SparkDimension;
+import src.sparkle.dimensions.DateDimension;
+import src.sparkle.dimensions.LinearDimension;
+import src.sparkle.dimensions.SparkDimension;
 
 public class Sparkle {
 	

@@ -135,27 +135,28 @@ public class MetricListExecutor implements Runnable {
 
 			// Now execute
 			try {
-				if (m.appliesTo(project)) {
-					if (m instanceof ITransientMetricProvider) {
-						((ITransientMetricProvider) m).measure(project, delta, ((ITransientMetricProvider) m).adapt(platform.getMetricsRepository(project).getDb()));
-					} else if (m instanceof IHistoricalMetricProvider) {
-						MetricHistoryManager historyManager = new MetricHistoryManager(platform);
-						historyManager.store(project, date, (IHistoricalMetricProvider) m);
-					}
-					
-					// Update the meta data -- need to requery the database due to Pongo caching in different threads(!)
-					project = platform.getProjectRepositoryManager().getProjectRepository().getProjects().findOneByShortName(project.getShortName());
-					mpd = getProjectModelMetricProvider(project, m);
-				
-					if (mpd == null) {	//FIXME
-						mpd = new MetricProviderExecution();
-						mpd.setMetricProviderId(m.getIdentifier());
-						mpd.setType(type);
+					if (m.appliesTo(project)) {
+						if (m instanceof ITransientMetricProvider) {
+							
+							((ITransientMetricProvider) m).measure(project, delta, ((ITransientMetricProvider) m).adapt(platform.getMetricsRepository(project).getDb()));
+						} else if (m instanceof IHistoricalMetricProvider) {
+							MetricHistoryManager historyManager = new MetricHistoryManager(platform);
+							historyManager.store(project, date, (IHistoricalMetricProvider) m);
+						}
+						
+						// Update the meta data -- need to requery the database due to Pongo caching in different threads(!)
 						project = platform.getProjectRepositoryManager().getProjectRepository().getProjects().findOneByShortName(project.getShortName());
-						project.getExecutionInformation().getMetricProviderData().add(mpd);
-					}
-					platform.getProjectRepositoryManager().getProjectRepository().sync();
-					logger.info("Metric Executed ("+m.getShortIdentifier()+").");
+						mpd = getProjectModelMetricProvider(project, m);
+					
+						if (mpd == null) {	//FIXME
+							mpd = new MetricProviderExecution();
+							mpd.setMetricProviderId(m.getIdentifier());
+							mpd.setType(type);
+							project = platform.getProjectRepositoryManager().getProjectRepository().getProjects().findOneByShortName(project.getShortName());
+							project.getExecutionInformation().getMetricProviderData().add(mpd);
+						}
+						platform.getProjectRepositoryManager().getProjectRepository().sync();
+						logger.info("Metric Executed ("+m.getShortIdentifier()+").");
 				}
 			} catch (Exception e) {
 				logger.error("Exception thrown during metric provider execution ("+m.getShortIdentifier()+").", e);

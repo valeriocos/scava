@@ -1,10 +1,10 @@
-package sparkle.dimensions;
+package src.sparkle.dimensions;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import sparkle.scales.DateScale;
+import src.sparkle.scales.DateScale;
 
 public class DateDimension extends SparkDimension<Date>{
 	

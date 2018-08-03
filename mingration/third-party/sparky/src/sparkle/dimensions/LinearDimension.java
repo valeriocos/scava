@@ -1,9 +1,9 @@
-package sparkle.dimensions;
+package src.sparkle.dimensions;
 
 import java.util.Collections;
 import java.util.List;
 
-import sparkle.scales.LinearScale;
+import src.sparkle.scales.LinearScale;
 
 public class LinearDimension extends SparkDimension<Double>{
 	

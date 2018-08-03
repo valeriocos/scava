@@ -1,8 +1,8 @@
-package sparkle.dimensions;
+package src.sparkle.dimensions;
 
 import java.util.List;
 
-import sparkle.scales.Scale;
+import src.sparkle.scales.Scale;
 
 public abstract class SparkDimension<T> {
 	
