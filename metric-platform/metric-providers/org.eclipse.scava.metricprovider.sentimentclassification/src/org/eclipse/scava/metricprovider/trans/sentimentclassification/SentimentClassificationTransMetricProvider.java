@@ -239,9 +239,9 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		return newsgroupArticlesData;
 	}
 
+	//Do not delete the articles database, it is used in other metrics
 	private void clearDB(SentimentClassificationTransMetric db) {
 		db.getBugTrackerComments().getDbCollection().drop();
-		db.getNewsgroupArticles().getDbCollection().drop();
 		db.sync();
 	}
 

@@ -15,17 +15,13 @@ import org.eclipse.scava.nlp.predictionmanager.Prediction;
 import org.eclipse.scava.platform.IMetricProvider;
 import org.eclipse.scava.platform.ITransientMetricProvider;
 import org.eclipse.scava.platform.MetricProviderContext;
-import org.eclipse.scava.repository.model.BugTrackingSystem;
+import org.eclipse.scava.platform.delta.ProjectDelta;
+import org.eclipse.scava.platform.delta.bugtrackingsystem.PlatformBugTrackingSystemManager;
+import org.eclipse.scava.platform.delta.communicationchannel.PlatformCommunicationChannelManager;
 import org.eclipse.scava.repository.model.CommunicationChannel;
 import org.eclipse.scava.repository.model.Project;
 import org.eclipse.scava.repository.model.cc.nntp.NntpNewsGroup;
 import org.eclipse.scava.repository.model.sourceforge.Discussion;
-import org.eclipse.scava.platform.delta.ProjectDelta;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemComment;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemDelta;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemProjectDelta;
-import org.eclipse.scava.platform.delta.bugtrackingsystem.PlatformBugTrackingSystemManager;
-import org.eclipse.scava.platform.delta.communicationchannel.PlatformCommunicationChannelManager;
 
 import com.mongodb.DB;
 
@@ -92,7 +88,6 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 	@Override
 	public void measure(Project project, ProjectDelta projectDelta, DetectingCodeTransMetric db) {
 		System.err.println("Started " + getIdentifier());
-		BugTrackingSystemProjectDelta btspDelta = projectDelta.getBugTrackingSystemDelta();
 		clearDB(db);
 		
 		TextpreprocessingTransMetric preprocessor = ((TextPreprocessingTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));

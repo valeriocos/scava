@@ -59,8 +59,12 @@ public class Classifier {
 		classificationInstanceCollection.add(featureGenerator, articleData, threadId, featureIdCollection);
 	}
 
-	public void add(String url, CommunicationChannelArticle deltaArticle, int threadId) {
-		classificationInstanceCollection.add(url, deltaArticle, threadId);
+//	public void add(String url, CommunicationChannelArticle deltaArticle, int threadId) {
+//		classificationInstanceCollection.add(url, deltaArticle, threadId);
+//	}
+	
+	public void add(String url, CommunicationChannelArticle deltaArticle, int threadId, ClassificationInstance classificationInstance) {
+		classificationInstanceCollection.add(url, deltaArticle, threadId, classificationInstance);
 	}
 
 	public ClassificationInstance getClassificationInstance(ClassifierMessage classifierMessage) {
