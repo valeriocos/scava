@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.scava.metricprovider.trans.textpreprocessing.model.BugTrackerCommentsTextPreprocessing;
 import org.eclipse.scava.metricprovider.trans.textpreprocessing.model.NewsgroupArticlesTextPreprocessing;
@@ -34,6 +35,8 @@ public class TextPreprocessingTransMetricProvider implements ITransientMetricPro
 
 	protected PlatformBugTrackingSystemManager platformBugTrackingSystemManager;
 	protected PlatformCommunicationChannelManager communicationChannelManager;
+	
+	private Pattern newline = Pattern.compile("\\v+");
 	
 	@Override
 	public String getIdentifier() {
@@ -109,6 +112,8 @@ public class TextPreprocessingTransMetricProvider implements ITransientMetricPro
 				{
 					case "github": plainText=processGitHub(comment.getText()); break;
 					case "bugzilla": plainText=processBugzilla(comment.getText()); break;
+					case "jira":
+					case "redmine": plainText= processPlainText(comment.getText()); break; 
 				}
 				commentsData.setPlainText(plainText);
 			}
@@ -144,7 +149,14 @@ public class TextPreprocessingTransMetricProvider implements ITransientMetricPro
 	
 	private List<String> processGitHub(String text)
 	{
+		/*We need to duplicate the number of new lines as
+		newlines by default are softlines and disappear
+		in the Markdown parser.
+		*/
+		text=newline.matcher(text).replaceAll("\n\n");
 		text = MarkdownParserGitHub.parse(text);
+		//We need to delete the extra newlines again before parsing the text
+		text=newline.matcher(text).replaceAll("");
 		return HtmlParser.parse(text);
 	}
 	
@@ -158,13 +170,14 @@ public class TextPreprocessingTransMetricProvider implements ITransientMetricPro
 	
 	private List<String> processPlainText(String text)
 	{
-		//What about \r instead of \n?
-		List<String> textLines = Arrays.asList(text.split("\n"));
+		List<String> textLines = Arrays.asList(text.split("\\v+"));
 		return textLines;
 	}
 	
 	private void clearDB(TextpreprocessingTransMetric db) {
 		db.getBugTrackerComments().getDbCollection().drop();
+		db.getNewsgroupArticles().getDbCollection().drop();
+		db.sync();
 	}
 
 	private BugTrackerCommentsTextPreprocessing findBugTrackerComment(TextpreprocessingTransMetric db, 

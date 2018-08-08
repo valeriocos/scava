@@ -21,7 +21,7 @@ public class GitHubIssue extends BugTrackingSystemBug {
 
 	private static final long serialVersionUID = 1L;
 
-	private String title;
+	
 	private Date closedTime;
 	private Date updatedTime;
 	private int numComments;
@@ -44,10 +44,7 @@ public class GitHubIssue extends BugTrackingSystemBug {
 		setBugId(Long.toString(id));
 	}
 
-	public void setTitle(Issues issue) {
-		String issueTitle = issue.getTitle().trim();
-		this.title = issueTitle;
-	}
+
 
 	public void setClosedTime(Issues issue) {
 		
@@ -126,9 +123,6 @@ public class GitHubIssue extends BugTrackingSystemBug {
 	// Getters
 	// ----------------------------------------------------------------------------------
 
-	public String getTitle() {
-		return title;
-	}
 
 	public Date getClosedTime() {
 		return closedTime;

@@ -258,7 +258,7 @@ public class RedmineRestClient {
 		}
 		getRequest.header("accept", "application/json");
 
-		// System.out.println(getRequest.getUrl());
+		//System.out.println(getRequest.getUrl());
 
 		HttpResponse<InputStream> response = getRequest.asBinary();
 		if (response.getCode() != 200) {

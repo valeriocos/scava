@@ -241,6 +241,8 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 
 	private void clearDB(SentimentClassificationTransMetric db) {
 		db.getBugTrackerComments().getDbCollection().drop();
+		db.getNewsgroupArticles().getDbCollection().drop();
+		db.sync();
 	}
 
 	@Override

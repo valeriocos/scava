@@ -186,6 +186,8 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 	
 	private void clearDB(DetectingCodeTransMetric db) {
 		db.getBugTrackerComments().getDbCollection().drop();
+		db.getNewsgroupArticles().getDbCollection().drop();
+		db.sync();
 	}
 
 }

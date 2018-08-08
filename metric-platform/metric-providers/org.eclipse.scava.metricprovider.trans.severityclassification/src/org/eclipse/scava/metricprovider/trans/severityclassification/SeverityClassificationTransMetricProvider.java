@@ -56,7 +56,6 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 	protected PlatformCommunicationChannelManager communicationChannelManager;
 
 	protected MetricProviderContext context;
-
 	protected List<IMetricProvider> uses;
 
 	@Override
@@ -80,6 +79,8 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
+//		return Arrays.asList(ThreadsTransMetricProvider.class.getCanonicalName(),
+//				DetectingCodeTransMetricProvider.class.getCanonicalName());
 		return Arrays.asList(ThreadsTransMetricProvider.class.getCanonicalName());
 	}
 
@@ -101,10 +102,13 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 		final long startTime = System.currentTimeMillis();
 		long previousTime = startTime;
 		previousTime = printTimeMessage(startTime, previousTime, -1, "Started " + getIdentifier());
-
-		BugTrackingSystemProjectDelta btspDelta = projectDelta.getBugTrackingSystemDelta();
 		
-    	Classifier classifier = new Classifier();
+		Classifier classifier = new Classifier();
+    	//DetectingCodeTransMetric detectingCodeMetric = ((DetectingCodeTransMetricProvider)uses.get(1)).adapt(context.getProjectDB(project));
+    	
+		//We filter between the bugs that indicate their severity and those that do not indicate the severity
+		
+    	BugTrackingSystemProjectDelta btspDelta = projectDelta.getBugTrackingSystemDelta();
 		for (BugTrackingSystemDelta bugTrackingSystemDelta : btspDelta.getBugTrackingSystemDeltas()) {
 			BugTrackingSystem bugTracker = bugTrackingSystemDelta.getBugTrackingSystem();
 			Map<String, String> bugIdsNoSeverity2Subject = new HashMap<String, String>();
@@ -139,7 +143,30 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 					} 
 				}
 			}
+				
 			Set<String> alreadyEncounteredBugIds = new HashSet<String>();
+			
+			//For those that we do not know nothing we will need to classify them
+//			Iterable<BugTrackerCommentsDetectingCode> commentsIt = detectingCodeMetric.getBugTrackerComments();
+//			for(BugTrackerCommentsDetectingCode comment : commentsIt)
+//			{
+//				if (bugIdsNoSeverity2Subject.containsKey(comment.getBugId()))
+//				{
+//					//For the moment, we are not adding the subject to the classification
+//					//Is it necessary?
+//					ClassifierMessage classifierMessage = prepareBugTrackerClassifierMessage(comment);
+//					if (alreadyEncounteredBugIds.contains(comment.getBugId()))
+//					{
+//						classifier.add(classifierMessage);
+//						
+//					} else
+//					{
+//						alreadyEncounteredBugIds.add(comment.getBugId());
+//						FeatureIdCollection featureIdCollection = retrieveBugTrackerBugFeatures(db, bugTracker, comment.getBugId());
+//						classifier.add(classifierMessage, featureIdCollection);
+//					}
+//				}
+//			}
 			for (BugTrackingSystemComment comment: bugTrackingSystemDelta.getComments()) {
 				if (bugIdsNoSeverity2Subject.containsKey(comment.getBugId())) {
 					String subject = bugIdsNoSeverity2Subject.get(comment.getBugId());
@@ -161,46 +188,48 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 		previousTime = printTimeMessage(startTime, previousTime, 
 										classifier.instanceCollectionSize(), "prepared bug comments");
 		
-		NewsgroupsThreadsTransMetric usedClassifier = 
-				((ThreadsTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		NewsgroupsThreadsTransMetric usedClassifier = ((ThreadsTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
 		
 		CommunicationChannelProjectDelta ccpDelta = projectDelta.getCommunicationChannelDelta();
-		for ( CommunicationChannelDelta communicationChannelDelta: ccpDelta.getCommunicationChannelSystemDeltas()) {
+		for ( CommunicationChannelDelta communicationChannelDelta: ccpDelta.getCommunicationChannelSystemDeltas())
+		{
 			CommunicationChannel communicationChannel = communicationChannelDelta.getCommunicationChannel();
 			String communicationChannelName;
 			if (!(communicationChannel instanceof NntpNewsGroup))
 				communicationChannelName = communicationChannel.getUrl();
-			else {
+			else
+			{
 				NntpNewsGroup newsgroup = (NntpNewsGroup) communicationChannel;
 				communicationChannelName = newsgroup.getNewsGroupName();
 			}
 			if (communicationChannelDelta.getArticles().size()==0) continue;
 
 //			load all stored articles for this newsgroup
-			Map<Integer, FeatureIdCollection> articlesFeatureIdCollections = 
-											  retrieveNewsgroupArticleFeatures(db, communicationChannelName);
+			Map<Integer, FeatureIdCollection> articlesFeatureIdCollections = retrieveNewsgroupArticleFeatures(db, communicationChannelName);
 			System.err.println("articlesFeatureIdCollections.size(): " + articlesFeatureIdCollections.size());
 
-			Map<Integer, CommunicationChannelArticle> articlesDeltaArticles = 
-											new HashMap<Integer, CommunicationChannelArticle>();
+			Map<Integer, CommunicationChannelArticle> articlesDeltaArticles = new HashMap<Integer, CommunicationChannelArticle>();
 			for (CommunicationChannelArticle article: communicationChannelDelta.getArticles())
 				articlesDeltaArticles.put(article.getArticleNumber(), article);
 			System.err.println("articlesDeltaArticles.size(): " + articlesDeltaArticles.size());
 			
-			for (ThreadData threadData: usedClassifier.getThreads()) {
+			for (ThreadData threadData: usedClassifier.getThreads())
+			{
 				int threadId = threadData.getThreadId();
-				for (ArticleData articleData: threadData.getArticles()) {
-					if (articlesFeatureIdCollections.containsKey(articleData.getArticleNumber())) {
-						FeatureIdCollection featureIdCollection  = 
-								articlesFeatureIdCollections.get(articleData.getArticleNumber());
+				for (ArticleData articleData: threadData.getArticles())
+				{
+					if (articlesFeatureIdCollections.containsKey(articleData.getArticleNumber()))
+					{
+						FeatureIdCollection featureIdCollection  = articlesFeatureIdCollections.get(articleData.getArticleNumber());
 						classifier.add(articleData, threadId, featureIdCollection);
-					} else {
-						CommunicationChannelArticle deltaArticle = 
-								articlesDeltaArticles.get(articleData.getArticleNumber());
+					}
+					else
+					{
+						//We need to match here the thread article with the code detector article
+						CommunicationChannelArticle deltaArticle = articlesDeltaArticles.get(articleData.getArticleNumber());
 						classifier.add(communicationChannelName, deltaArticle, threadId);
 						
-						NewsgroupArticleData newsgroupArticleData = 
-								prepareNewsgroupArticleData(classifier, communicationChannelName, deltaArticle, threadId);
+						NewsgroupArticleData newsgroupArticleData = prepareNewsgroupArticleData(classifier, communicationChannelName, deltaArticle, threadId);
 
 						db.getNewsgroupArticles().add(newsgroupArticleData);
 
@@ -370,6 +399,21 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 		return DurationFormatUtils.formatDuration(timeInMS, "HH:mm:ss,SSS");
 	}
 
+//	private ClassifierMessage prepareBugTrackerClassifierMessage(BugTrackerCommentsDetectingCode comment) {
+//		ClassifierMessage classifierMessage = new ClassifierMessage();
+//		classifierMessage.setBugTrackerId(comment.getBugTrackerId());
+//		classifierMessage.setBugId(comment.getBugId());
+//		classifierMessage.setCommentId(comment.getCommentId());
+//		//classifierMessage.setSubject(bugSubject);
+//		
+//		if (comment.getNaturalLanguage() == null) {
+//			classifierMessage.setText("");			
+//		} else {
+//			classifierMessage.setText(comment.getNaturalLanguage());
+//		}
+//        return classifierMessage;
+//	}
+	
 	private ClassifierMessage prepareBugTrackerClassifierMessage(
 			BugTrackingSystem bugTracker, BugTrackingSystemComment comment, String bugSubject) {
 		ClassifierMessage classifierMessage = new ClassifierMessage();

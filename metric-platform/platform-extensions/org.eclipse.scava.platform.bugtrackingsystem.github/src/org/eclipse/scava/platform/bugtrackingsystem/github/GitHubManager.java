@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.scava.platform.bugtrackingsystem.github;
 
-
-
 //Java
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +37,6 @@ import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemDelta
 import org.eclipse.scava.platform.delta.bugtrackingsystem.IBugTrackingSystemManager;
 //DB Model packages
 import org.eclipse.scava.repository.model.BugTrackingSystem;
-
 //Mongo DB package
 import com.mongodb.DB;
 
@@ -50,16 +47,19 @@ import com.mongodb.DB;
 public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker> {
 
 	private List<Issues> repoIssuesList = new ArrayList<>();
-	private List<Integer> pullRequestIdList = new ArrayList<>(); /// this list is necessary for addressing a limitation with the get all pull requests function
-	private List<IssuesComments> repoCommentsList = new ArrayList<>();
+	private List<Integer> pullRequestIdList = new ArrayList<>(); // this list is necessary for addressing a limitation with the get all pull requests function
+	private List<GitHubComment> repoCommentsList = new ArrayList<>();
 	private List<PullRequest> repoPullRequestsList = new ArrayList<>();
+	private List<Integer> issueIds = new ArrayList<>();
 	private static GitHubSessionUtil gitHubSession = null;
 
 	@Override
 	public boolean appliesTo(BugTrackingSystem bugTrackingSystem) {
 		return bugTrackingSystem instanceof GitHubBugTracker;
 	}
-
+	/*
+	 * DELTAS
+	 * */
 	@Override
 	public BugTrackingSystemDelta getDelta(DB db, GitHubBugTracker ghbt, Date date) throws Exception {
 
@@ -100,19 +100,18 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 			throws Exception {
 
 		// converts platform date to java date for comparison.
-		java.util.Date day = date.toJavaDate();
+		java.util.Date today = date.toJavaDate();
 
-		for (IssuesComments comment : repoCommentsList) {
+		for (GitHubComment comment : repoCommentsList) {
 
-			Date commentDate = new Date(comment.getCreatedAt().replace("-", "").substring(0, 8).toString());
-
-			if (DateUtils.isSameDay(commentDate.toJavaDate(), day)) {
-				GitHubComment gitHubComment = new GitHubComment();
-
-				System.out.println("\t[Comment      ] " + comment.getCreatedAt() + "\t" + comment.getBody());
+			Date commentDate = new Date(comment.getCreationTime());
+			
+			if (DateUtils.isSameDay(commentDate.toJavaDate(), today)) {
+			
+				System.out.println("\t[Comment      ] " + comment.getCreationTime() + "\t" + comment.getText());
 				
-				gitHubComment = GitHubReaderUtils.convertToGitHubComment(comment);
-				delta.getComments().add(gitHubComment);
+				delta.getComments().add(comment);
+				
 			}
 
 		}
@@ -121,7 +120,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 	private void getIssuesOnDay(GitHubBugTracker ghbt, Date date, GitHubBugTrackingSystemDelta delta) throws Exception {
 
 		// converts platform date to java date for comparison.
-		java.util.Date day = date.toJavaDate();
+		java.util.Date today = date.toJavaDate();
 
 		for (Issues issue : repoIssuesList) {
 
@@ -138,19 +137,20 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 				GitHubIssue gitHubIssue = new GitHubIssue();
 				
 				// if the issue was created on the day in question add 
-				if (DateUtils.isSameDay(createdSimple.toJavaDate(), day)) {
+				if (DateUtils.isSameDay(createdSimple.toJavaDate(), today)) {
 				
-					gitHubIssue = GitHubReaderUtils.convertToGitHubIssue(issue);
+					gitHubIssue = GitHubReaderUtils.convertToGitHubIssue(issue, ghbt, today);
 	
 					System.out.println("\t[Issue Created] " + issue.getCreatedAt() + "\t" + issue.getTitle());
 					
 					delta.getNewBugs().add(gitHubIssue);
+					
 					 
 				}
 
 				// if issue was updated on this day and was modified after the
 				// creation time (on the same day) add to updated bugs list
-				if (DateUtils.isSameDay(updatedSimple.toJavaDate(), day)) {
+				if (DateUtils.isSameDay(updatedSimple.toJavaDate(), today)) {
 
 					// Dates that also include time-stamp for exact comparison
 					DateTimeFormatter parser = ISODateTimeFormat.dateTimeParser();
@@ -161,7 +161,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 					// day but after the time they were created
 					if (isoUpdated.isAfter(isoCreated) == true) {
 						
-						gitHubIssue = GitHubReaderUtils.convertToGitHubIssue(issue);
+						gitHubIssue = GitHubReaderUtils.convertToGitHubIssue(issue, ghbt, today);
 						
 						System.out.println("\t[Issue Updated] " + issue.getUpdatedAt() + "\t" + issue.getTitle());
 						
@@ -173,26 +173,28 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 			}
 
 		}
+		
 	}
 
 	private void getPullRequestsOnDay(GitHubBugTracker ghbt, Date date, GitHubBugTrackingSystemDelta delta)
 			throws Exception {
 
 		// converts platform date to java date for comparison.
-		java.util.Date day = date.toJavaDate();
+		java.util.Date today = date.toJavaDate();
 
 		for (PullRequest pullRequest : repoPullRequestsList) {
 
 			Date pullRequestDate = new Date(pullRequest.getCreatedAt().replace("-", "").substring(0, 8).toString());
 
-			if (DateUtils.isSameDay(pullRequestDate.toJavaDate(), day)) {
+			if (DateUtils.isSameDay(pullRequestDate.toJavaDate(), today)) {
 				
 				GitHubPullRequest gitHubPullRequest = new GitHubPullRequest();
 				
-				gitHubPullRequest = GitHubReaderUtils.convertToGitHubPullRequest(pullRequest);
+				gitHubPullRequest = GitHubReaderUtils.convertToGitHubPullRequest(pullRequest, ghbt, today);
 				System.out.println("\t[Pull Request ] " + pullRequest.getCreatedAt() + "\t" + pullRequest.getTitle());
 				delta.getPullRequests().add(gitHubPullRequest);
 			}
+			
 		}
 	}
 
@@ -207,7 +209,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 	private void getAllData(GitHubBugTracker ghbt, Date earliestDate) throws Exception {
 
 		this.getAllIssues(ghbt, earliestDate);
-		this.getAllComments(ghbt, earliestDate);
+		this.getAllIssueComments(ghbt);
 		this.getAllPullRequests(ghbt);
 
 	}
@@ -237,6 +239,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 				"created", "asc", earliestDate.toString());
 		repoIssues.observe()
 				.doOnNext(issue -> {
+					this.issueIds.add(issue.getNumber());
 					this.addIssueToList(issue);
 					this.checkForPullRequest(issue);
 				})
@@ -245,36 +248,41 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 	}
 
 	/**
-	 * Gets comments from the repository from the earliest date
-	 * @param ghbt GitHubBugTracker
+	 * Gets all comments from issues that have them
+	 * 
+	 * @param ghbt
 	 * @throws Exception
 	 */
-	private void getAllComments(GitHubBugTracker ghbt, Date earliestDate) throws Exception {
+	private void getAllIssueComments(GitHubBugTracker ghbt) throws Exception{
+	
+		for (Integer id : this.issueIds) {
+				
+				IGitHubApi gitHubApi = getSession(ghbt);
+				IDataSet<IssuesComments> repoComments = gitHubApi.getReposIssuesComments(ghbt.getOwner(), ghbt.getRepository(), id);
+				repoComments.observe()
+						.doOnNext(comment -> {
+							this.addCommentToList(GitHubReaderUtils.convertToGitHubComment(comment, ghbt, id));
+						})
+						.doOnError(e -> System.out.println(e))
+						.blockingSubscribe();
+				
+			}
+		
 
-		IGitHubApi gitHubApi = getSession(ghbt);
-		IDataSet<IssuesComments> repoComments = gitHubApi.getReposIssuesComments(ghbt.getOwner(), ghbt.getRepository(),
-				"asc", "created", earliestDate.toString());
-		repoComments.observe()
-				.doOnNext(value -> {
-					this.addCommentToList(value);
-				})
-				.doOnError(e -> System.out.println(e))
-				.blockingSubscribe();
 	}
+
 	
 	/**
-	 * Gets all pullrequests from the repository from the earliest date
+	 * Gets all pullrequests from the repository
 	 * 
 	 * @param ghbt GitHubBugTracker
 	 * @throws Exception
 	 */
 	private void getAllPullRequests(GitHubBugTracker ghbt) throws Exception {
 		
-
-		IGitHubApi gitHubApi = getSession(ghbt);
 		for (int id : pullRequestIdList){
 			
-			//IGitHubApi gitHubApi = getSession(ghbt);
+			IGitHubApi gitHubApi = getSession(ghbt);
 			IData<PullRequest> pullRequests = gitHubApi.getReposPullsPullRequestByNumber(ghbt.getOwner(), ghbt.getRepository(), id);
 			pullRequests.observe()
 			.doOnNext(pullRequest -> {
@@ -300,9 +308,9 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 
 	}
 
-	private void addCommentToList(IssuesComments comment) {
+	private void addCommentToList(GitHubComment gitHubComment) {
 
-		this.repoCommentsList.add(comment);
+		this.repoCommentsList.add(gitHubComment);
 
 	}
 
@@ -352,32 +360,13 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 	@Override
 	public String getContents(DB db, GitHubBugTracker ghbt, BugTrackingSystemBug bug) throws Exception {
 
-		// IGitHubApi gitHubApi = GitHubSessionUtil.getSession();
-
-		// //old code
-		// GitHubSession github = getSession(ghbt);
-		// Issue issue = github.getIssue(ghbt.getUser(), ghbt.getRepository(),
-		// bug.getBugId());
-		// if (null != issue) {
-		// return issue.getBodyText();
-		// }
 		return null;
 	}
 
 	@Override
 	public String getContents(DB db, GitHubBugTracker ghbt, BugTrackingSystemComment comment) throws Exception {
 
-		// IGitHubApi gitHubApi = GitHubSessionUtil.getSession();
-
-		// //old code
-		// GitHubSession github = getSession(ghbt);
-		//
-		// long commentId = Long.parseLong(comment.getCommentId());
-		// Comment ghComment = github.getComment(ghbt.getUser(),
-		// ghbt.getRepository(), commentId);
-		// if (null != ghComment) {
-		// return ghComment.getBodyText();
-		// }
+		
 		return null;
 	}
 
@@ -416,8 +405,8 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 		
 		// sets GitHubTracker Information
 		GitHubBugTracker ghbt = new GitHubBugTracker();
-		ghbt.setProject(user, token, repo, owner);
-		
+		//ghbt.setProject(user, login, "dccw2097", repo, owner );
+		ghbt.setProject(user, login, "dccw2097", "scava", "crossminer");
 		
 		//creates new instances of...
 		GitHubBugTrackingSystemDelta delta = new GitHubBugTrackingSystemDelta();
@@ -457,7 +446,8 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 			on.addDays(1);
 		} while (on.compareTo(today) < 1);
 		System.out.println("[END]");
-
+		
+		
 		System.exit(0);// terminates reader
 	}
 

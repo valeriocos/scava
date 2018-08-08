@@ -56,8 +56,8 @@ class RedmineIssueDeserialiser extends
 			RedmineComment[] comments = oc.treeToValue(commentsNode,
 					RedmineComment[].class);
 			for (RedmineComment comment : comments) {
-				issue.getComments().add(comment);
 				comment.setBugId(bugId);
+				issue.getComments().add(comment);	
 			}
 		}
 

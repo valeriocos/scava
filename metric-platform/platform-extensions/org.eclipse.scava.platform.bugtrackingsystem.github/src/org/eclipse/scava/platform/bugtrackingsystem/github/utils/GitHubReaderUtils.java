@@ -11,6 +11,7 @@ import java.util.Date;
 import org.eclipse.scava.platform.bugtrackingsystem.github.GitHubComment;
 import org.eclipse.scava.platform.bugtrackingsystem.github.GitHubIssue;
 import org.eclipse.scava.platform.bugtrackingsystem.github.GitHubPullRequest;
+import org.eclipse.scava.repository.model.BugTrackingSystem;
 import org.eclipse.scava.workflow.restmule.generated.client.github.model.Issues;
 import org.eclipse.scava.workflow.restmule.generated.client.github.model.IssuesComments;
 import org.eclipse.scava.workflow.restmule.generated.client.github.model.PullRequest;
@@ -30,13 +31,14 @@ public class GitHubReaderUtils {
 	 * @return gitHubIssue
 	 * 
 	 **/
-	@SuppressWarnings("unused")
-	public static GitHubIssue convertToGitHubIssue(Issues issue)  {
+	public static GitHubIssue convertToGitHubIssue(Issues issue, BugTrackingSystem ghbt, Date day)  {
+		
 
 		GitHubIssue gitHubIssue = new GitHubIssue();
+		gitHubIssue.setBugTrackingSystem(ghbt);
 		gitHubIssue.setBugId(issue.getNumber().toString());
-		gitHubIssue.setTitle(issue);
-		gitHubIssue.setClosedTime(issue);
+		gitHubIssue.setSummary(issue.getTitle());
+		gitHubIssue.setCreationTime(convertStringToDate(issue.getCreatedAt()) );
 		gitHubIssue.setClosedTime(issue);
 		gitHubIssue.setUpdatedTime(issue);
 		gitHubIssue.setNumComments(issue);
@@ -57,11 +59,17 @@ public class GitHubReaderUtils {
 	 * @return gitHubComment
 	 * 
 	 **/
-	@SuppressWarnings("unused")
-	public static GitHubComment convertToGitHubComment(IssuesComments comment){
+	
+	public static GitHubComment convertToGitHubComment(IssuesComments comment, BugTrackingSystem ghbt, Integer issueId){
 		GitHubComment gitHubComment = new GitHubComment();
-		
-		
+		gitHubComment.setBugTrackingSystem(ghbt);
+		gitHubComment.setCommentId(comment.getId().toString());
+		gitHubComment.setCreator(comment.getUser().getId().toString());
+		gitHubComment.setCreationTime(convertStringToDate(comment.getCreatedAt()));
+		gitHubComment.setText(comment.getBody());
+		gitHubComment.setBugId(issueId.toString());
+		gitHubComment.setUpdatedAt(convertStringToDate(comment.getUpdatedAt()));
+		gitHubComment.setUrl(comment.getUrl());
 		
 		return gitHubComment;
 	}
@@ -73,12 +81,39 @@ public class GitHubReaderUtils {
 	 * @return gitHubPullRequest
 	 * 
 	 **/
-	@SuppressWarnings("unused")
-	public static  GitHubPullRequest convertToGitHubPullRequest(PullRequest pullRequest){
+	public static  GitHubPullRequest convertToGitHubPullRequest(PullRequest pullRequest, BugTrackingSystem ghbt, Date day){
 		//TODO will also need to handle pullrequest head
 		GitHubPullRequest gitHubPullRequest = new GitHubPullRequest();
-	
 		
+		gitHubPullRequest.setMergeable(pullRequest);
+		gitHubPullRequest.setMerged(pullRequest);
+		gitHubPullRequest.setClosedAt(pullRequest);
+		gitHubPullRequest.setMergedAt(pullRequest);
+		gitHubPullRequest.setUpdatedAt(pullRequest);
+		gitHubPullRequest.setAdditions(pullRequest);
+		gitHubPullRequest.setChangedFiles(pullRequest);
+		gitHubPullRequest.setComments(pullRequest);
+		gitHubPullRequest.setCommits(pullRequest);
+		gitHubPullRequest.setDeletions(pullRequest);
+		gitHubPullRequest.setNumber(pullRequest);
+		gitHubPullRequest.setMilestone(pullRequest);
+		//gitHubPullRequest.setBase(pullRequest.getBase());
+		//gitHubPullRequest.setHead(pullRequest.getHead());
+		gitHubPullRequest.setBody(pullRequest);
+		gitHubPullRequest.setDiffUrl(pullRequest);
+		gitHubPullRequest.setHtmlUrl(pullRequest);
+		gitHubPullRequest.setIssueUrl(pullRequest);
+		gitHubPullRequest.setPatchUrl(pullRequest);
+		gitHubPullRequest.setState(pullRequest);
+		gitHubPullRequest.setTitle(pullRequest);
+		gitHubPullRequest.setUrl(pullRequest);
+		gitHubPullRequest.setMergedBy(pullRequest);
+		gitHubPullRequest.setUser(pullRequest);
+		
+		
+		
+	
+	
 		
 
 		return gitHubPullRequest;

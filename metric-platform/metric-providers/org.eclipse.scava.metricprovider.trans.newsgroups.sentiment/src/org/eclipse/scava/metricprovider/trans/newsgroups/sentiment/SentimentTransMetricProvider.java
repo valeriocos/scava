@@ -88,15 +88,14 @@ public class SentimentTransMetricProvider  implements
 	public void measure(Project project, ProjectDelta projectDelta, 
 						NewsgroupsSentimentTransMetric db) {
 //		final long startTime = System.currentTimeMillis();
-		
-		db.getThreads().getDbCollection().drop();
-		db.sync();
 
 		if (uses.size()!=2) {
 			System.err.println("Metric: " + getIdentifier() + " failed to retrieve " + 
-								"the three transient metrics it needs!");
+								"the two transient metrics it needs!");
 			System.exit(-1);
 		}
+		
+		clearDB(db);
 
 		NewsgroupsThreadsTransMetric usedThreads = 
 				((ThreadsTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
@@ -153,6 +152,12 @@ public class SentimentTransMetricProvider  implements
 		}
 		db.sync();
 		
+	}
+	
+	public void clearDB(NewsgroupsSentimentTransMetric db)
+	{
+		db.getThreads().getDbCollection().drop();
+		db.sync();
 	}
 
 	@Override
