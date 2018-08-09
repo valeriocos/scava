@@ -31,7 +31,6 @@ class CodeDetectorSingleton
 			codeDetector = getModelBin();
 		} catch (IllegalArgumentException | IOException | ModelExceptions e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

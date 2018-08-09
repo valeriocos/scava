@@ -14,9 +14,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
-import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentsDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentDetectingCode;
 import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
-import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticlesDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.model.BugTrackerCommentsData;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesData;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.model.SentimentClassificationTransMetric;
@@ -91,9 +91,9 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		Classifier classifier = new Classifier();
 		
 		DetectingCodeTransMetric detectingCodeMetric = ((DetectingCodeTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
-		Iterable<BugTrackerCommentsDetectingCode> commentsIt = detectingCodeMetric.getBugTrackerComments();
+		Iterable<BugTrackerCommentDetectingCode> commentsIt = detectingCodeMetric.getBugTrackerComments();
 		
-		for(BugTrackerCommentsDetectingCode comment : commentsIt)
+		for(BugTrackerCommentDetectingCode comment : commentsIt)
 		{
 			BugTrackerCommentsData commentInSentiment = findBugTrackerComment(db, comment);
 			if(commentInSentiment == null)
@@ -112,9 +112,9 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
 										"prepared bug comments");
 		
-		Iterable<NewsgroupArticlesDetectingCode> articlesIt = detectingCodeMetric.getNewsgroupArticles();
+		Iterable<NewsgroupArticleDetectingCode> articlesIt = detectingCodeMetric.getNewsgroupArticles();
 		
-		for(NewsgroupArticlesDetectingCode article : articlesIt)
+		for(NewsgroupArticleDetectingCode article : articlesIt)
 		{
 			NewsgroupArticlesData articleInSentiment = findNewsgroupArticle(db, article);
 			if(articleInSentiment == null)
@@ -137,7 +137,7 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
 										"classifier.classify() finished");
 		
-		for(BugTrackerCommentsDetectingCode comment : commentsIt)
+		for(BugTrackerCommentDetectingCode comment : commentsIt)
 		{
 			BugTrackerCommentsData commentInSentiment = findBugTrackerComment(db, comment);
 			ClassificationInstance classificationInstance = prepareBugTrackerCommentInstance(comment);
@@ -151,7 +151,7 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		previousTime = printTimeMessage(startTime, previousTime, classifier.instanceListSize(),
 										"stored classified bug comments");
 		
-		for(NewsgroupArticlesDetectingCode article : articlesIt)
+		for(NewsgroupArticleDetectingCode article : articlesIt)
 		{
 			NewsgroupArticlesData articleInSentiment = findNewsgroupArticle(db, article);
 			ClassificationInstance classificationInstance = prepareNewsgroupArticleInstance(article);
@@ -179,7 +179,7 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		return DurationFormatUtils.formatDuration(timeInMS, "HH:mm:ss,SSS");
 	}
 	
-	private ClassificationInstance prepareBugTrackerCommentInstance(BugTrackerCommentsDetectingCode comment)
+	private ClassificationInstance prepareBugTrackerCommentInstance(BugTrackerCommentDetectingCode comment)
 	{
     	ClassificationInstance classificationInstance = new ClassificationInstance();
         classificationInstance.setBugTrackerId(comment.getBugTrackerId());
@@ -196,7 +196,7 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 	
 	
 
-	private ClassificationInstance prepareNewsgroupArticleInstance(NewsgroupArticlesDetectingCode  article)
+	private ClassificationInstance prepareNewsgroupArticleInstance(NewsgroupArticleDetectingCode  article)
 	{
     	ClassificationInstance classificationInstance = new ClassificationInstance();
         classificationInstance.setNewsgroupName(article.getNewsGroupName());
@@ -213,7 +213,7 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
         return classificationInstance;
 	}
 	
-	private BugTrackerCommentsData findBugTrackerComment(SentimentClassificationTransMetric db, BugTrackerCommentsDetectingCode comment)
+	private BugTrackerCommentsData findBugTrackerComment(SentimentClassificationTransMetric db, BugTrackerCommentDetectingCode comment)
 	{
 		BugTrackerCommentsData bugTrackerCommentsData = null;
 		Iterable<BugTrackerCommentsData> bugTrackerCommentsDataIt = 
@@ -226,7 +226,7 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 		return bugTrackerCommentsData;
 	}
 
-	private NewsgroupArticlesData findNewsgroupArticle(SentimentClassificationTransMetric db, NewsgroupArticlesDetectingCode article)
+	private NewsgroupArticlesData findNewsgroupArticle(SentimentClassificationTransMetric db, NewsgroupArticleDetectingCode article)
 	{
 		NewsgroupArticlesData newsgroupArticlesData = null;
 		Iterable<NewsgroupArticlesData> newsgroupArticlesDataIt = 

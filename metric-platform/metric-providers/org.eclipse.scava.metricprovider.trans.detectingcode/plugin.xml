@@ -9,8 +9,8 @@
    <extension
          point="com.googlecode.pongo.runtime.osgi">
          <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric"/>
-         <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentsDetectingCode"/>
-         <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticlesDetectingCode"/>
+         <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentDetectingCode"/>
+         <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode"/>
    </extension>
 
 </plugin>

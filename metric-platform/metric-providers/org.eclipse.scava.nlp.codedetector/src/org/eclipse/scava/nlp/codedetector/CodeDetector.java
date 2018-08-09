@@ -23,7 +23,6 @@ import org.eclipse.scava.nlp.preprocessor.normalizer.Normalizer;
 
 public class CodeDetector
 {
-//Singleton not working outside
 	private static FastText codeDetector;
 	private static CodeDetectorFormater formatter;
 	
@@ -70,7 +69,7 @@ public class CodeDetector
 	
 	/**
 	 * Predicts whether a text is Code or English.
-	 * @param text Input to analyze. To have better results, text must have been normalized with the text normalizer.
+	 * @param text Input to analyze.
      * @return {@link Prediction}, where it is kept the input text, 
      * its label (<i>__label__Code</i> or <i>__label__English</i>), and label's probabilities (float).
      * 
@@ -99,7 +98,7 @@ public class CodeDetector
 	
 	/**
 	 * Predicts whether a text is Code or English.
-	 * @param text Input to analyze. To have better results, text must have been normalized with the text normalizer.
+	 * @param text Input to analyze.
 	 * @param defaultLabel In the case that {@code text} is an empty string, this method returns a {@link Prediction} with
 	 * the label defined in {@code defaultLabel} and a probability of -1.0.
 	 * @return {@link Prediction}, where it is kept the input text, 
@@ -125,7 +124,7 @@ public class CodeDetector
 	
 	/**
 	 * Predicts for each element of a list of texts whether it is Code or English.
-	 * @param textList Input to analyze. To have better results, textList must have been normalized with the text normalizer.
+	 * @param textList Input to analyze.
      * @return {@code List<Prediction>}, where it is kept, for each entry of <b>textList</b>, the input text, 
      * its label (<i>__label__Code</i> or <i>__label__English</i>), and label's probabilities (float).
      * 
@@ -145,7 +144,7 @@ public class CodeDetector
 	
 	/**
 	 * Predicts for each element of a list of texts whether it is Code or English.
-	 * @param textList Input to analyze. To have better results, textList must have been normalized with the text normalizer.
+	 * @param textList Input to analyze.
 	 * @param defaultLabel In the case an element of {@code textList} is an empty string, this method returns a {@link Prediction} with
 	 * the label defined in {@code defaultLabel} and a probability of -1.0.
 	 * @return {@code List<Prediction>}, where it is kept, for each entry of <b>textList</b>, the input text, 

@@ -5,10 +5,10 @@
       <details key="qualifiedCollectionNames" value="true"/>
     </eAnnotations>
     <eAnnotations source="customize"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="bugTrackerComments" upperBound="-1" eType="//BugTrackerCommentsDetectingCode" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="newsgroupArticles" upperBound="-1" eType="//NewsgroupArticlesDetectingCode" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bugTrackerComments" upperBound="-1" eType="//BugTrackerCommentDetectingCode" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="newsgroupArticles" upperBound="-1" eType="//NewsgroupArticleDetectingCode" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="BugTrackerCommentsDetectingCode">
+  <eClassifiers xsi:type="ecore:EClass" name="BugTrackerCommentDetectingCode">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="bugTrackerId">
       <eAnnotations source="searchable"/>
       <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -26,7 +26,7 @@
       <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     </eStructuralFeatures>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="NewsgroupArticlesDetectingCode">
+  <eClassifiers xsi:type="ecore:EClass" name="NewsgroupArticleDetectingCode">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="newsGroupName">
       <eAnnotations source="searchable"/>
       <eType xsi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>

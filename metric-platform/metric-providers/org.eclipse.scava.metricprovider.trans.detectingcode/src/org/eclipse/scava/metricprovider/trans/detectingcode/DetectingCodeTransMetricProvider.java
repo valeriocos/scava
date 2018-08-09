@@ -3,13 +3,13 @@ package org.eclipse.scava.metricprovider.trans.detectingcode;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentsDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentDetectingCode;
 import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
-import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticlesDetectingCode;
-import org.eclipse.scava.metricprovider.trans.textpreprocessing.TextPreprocessingTransMetricProvider;
-import org.eclipse.scava.metricprovider.trans.textpreprocessing.model.BugTrackerCommentsTextPreprocessing;
-import org.eclipse.scava.metricprovider.trans.textpreprocessing.model.NewsgroupArticlesTextPreprocessing;
-import org.eclipse.scava.metricprovider.trans.textpreprocessing.model.TextpreprocessingTransMetric;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.PlainTextProcessingTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.BugTrackerCommentPlainTextProcessing;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.NewsgroupArticlePlainTextProcessing;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.PlainTextProcessingTransMetric;
 import org.eclipse.scava.nlp.codedetector.CodeDetector;
 import org.eclipse.scava.nlp.predictionmanager.Prediction;
 import org.eclipse.scava.platform.IMetricProvider;
@@ -70,7 +70,7 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
-		return Arrays.asList(TextPreprocessingTransMetricProvider.class.getCanonicalName());
+		return Arrays.asList(PlainTextProcessingTransMetricProvider.class.getCanonicalName());
 	}
 
 	@Override
@@ -90,17 +90,17 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 		System.err.println("Started " + getIdentifier());
 		clearDB(db);
 		
-		TextpreprocessingTransMetric preprocessor = ((TextPreprocessingTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		PlainTextProcessingTransMetric preprocessor = ((PlainTextProcessingTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
 		
 		//We obtain all the comments preprocessed by the Textpreprocessing Trans Metric
-		Iterable<BugTrackerCommentsTextPreprocessing> commentsIt = preprocessor.getBugTrackerComments();
+		Iterable<BugTrackerCommentPlainTextProcessing> commentsIt = preprocessor.getBugTrackerComments();
 		
-		for (BugTrackerCommentsTextPreprocessing comment : commentsIt)
+		for (BugTrackerCommentPlainTextProcessing comment : commentsIt)
 		{
-			BugTrackerCommentsDetectingCode commentDataInDC = findBugTrackerComment(db, comment);
+			BugTrackerCommentDetectingCode commentDataInDC = findBugTrackerComment(db, comment);
 			if(commentDataInDC == null)
 			{
-				commentDataInDC = new BugTrackerCommentsDetectingCode();
+				commentDataInDC = new BugTrackerCommentDetectingCode();
 				commentDataInDC.setBugTrackerId(comment.getBugTrackerId());
 				commentDataInDC.setBugId(comment.getBugId());
 				commentDataInDC.setCommentId(comment.getCommentId());
@@ -110,14 +110,14 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 			db.sync();
 		}
 		
-		Iterable<NewsgroupArticlesTextPreprocessing> articlesIt = preprocessor.getNewsgroupArticles();
+		Iterable<NewsgroupArticlePlainTextProcessing> articlesIt = preprocessor.getNewsgroupArticles();
 		
-		for (NewsgroupArticlesTextPreprocessing article : articlesIt)
+		for (NewsgroupArticlePlainTextProcessing article : articlesIt)
 		{
-			NewsgroupArticlesDetectingCode articleDataInDC = findNewsgroupArticle(db, article);
+			NewsgroupArticleDetectingCode articleDataInDC = findNewsgroupArticle(db, article);
 			if(articleDataInDC == null)
 			{
-				articleDataInDC = new NewsgroupArticlesDetectingCode();
+				articleDataInDC = new NewsgroupArticleDetectingCode();
 				articleDataInDC.setNewsGroupName(article.getNewsGroupName());
 				articleDataInDC.setArticleNumber(article.getArticleNumber());
 				db.getNewsgroupArticles().add(articleDataInDC);
@@ -127,14 +127,14 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 		}
 	}
 	
-	private void applyCodeDetector(List<String> plainText, BugTrackerCommentsDetectingCode comment)
+	private void applyCodeDetector(List<String> plainText, BugTrackerCommentDetectingCode comment)
 	{
 		String[] output = applyCodeDetector(plainText);
 		comment.setCode(output[0]);
 		comment.setNaturalLanguage(output[1]);
 	}
 	
-	private void applyCodeDetector(List<String> plainText, NewsgroupArticlesDetectingCode article)
+	private void applyCodeDetector(List<String> plainText, NewsgroupArticleDetectingCode article)
 	{
 		String[] output = applyCodeDetector(plainText);
 		article.setCode(output[0]);
@@ -151,28 +151,28 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 	}
 	
 	//See if in the database, we have already analyzed this comment (for CodeDetection)
-	private BugTrackerCommentsDetectingCode findBugTrackerComment(DetectingCodeTransMetric db, BugTrackerCommentsTextPreprocessing comment)
+	private BugTrackerCommentDetectingCode findBugTrackerComment(DetectingCodeTransMetric db, BugTrackerCommentPlainTextProcessing comment)
 	{
-		BugTrackerCommentsDetectingCode btcdc = null;
-		Iterable<BugTrackerCommentsDetectingCode> btcdcIt = 
+		BugTrackerCommentDetectingCode btcdc = null;
+		Iterable<BugTrackerCommentDetectingCode> btcdcIt = 
 				db.getBugTrackerComments().
-					find(BugTrackerCommentsDetectingCode.BUGID.eq(comment.getBugId()),
-							BugTrackerCommentsDetectingCode.COMMENTID.eq(comment.getCommentId()));
-		for(BugTrackerCommentsDetectingCode bcd : btcdcIt)
+					find(BugTrackerCommentDetectingCode.BUGID.eq(comment.getBugId()),
+							BugTrackerCommentDetectingCode.COMMENTID.eq(comment.getCommentId()));
+		for(BugTrackerCommentDetectingCode bcd : btcdcIt)
 		{
 			btcdc = bcd;
 		}
 		return btcdc;
 	}
 	
-	private NewsgroupArticlesDetectingCode findNewsgroupArticle(DetectingCodeTransMetric db, NewsgroupArticlesTextPreprocessing article)
+	private NewsgroupArticleDetectingCode findNewsgroupArticle(DetectingCodeTransMetric db, NewsgroupArticlePlainTextProcessing article)
 	{
-		NewsgroupArticlesDetectingCode nadc = null;
-		Iterable<NewsgroupArticlesDetectingCode> nadcIt = 
+		NewsgroupArticleDetectingCode nadc = null;
+		Iterable<NewsgroupArticleDetectingCode> nadcIt = 
 				db.getNewsgroupArticles().
-					find(NewsgroupArticlesDetectingCode.NEWSGROUPNAME.eq(article.getNewsGroupName()),
-							NewsgroupArticlesDetectingCode.ARTICLENUMBER.eq(article.getArticleNumber()));
-		for(NewsgroupArticlesDetectingCode nad : nadcIt)
+					find(NewsgroupArticleDetectingCode.NEWSGROUPNAME.eq(article.getNewsGroupName()),
+							NewsgroupArticleDetectingCode.ARTICLENUMBER.eq(article.getArticleNumber()));
+		for(NewsgroupArticleDetectingCode nad : nadcIt)
 		{
 			nadc = nad;
 		}

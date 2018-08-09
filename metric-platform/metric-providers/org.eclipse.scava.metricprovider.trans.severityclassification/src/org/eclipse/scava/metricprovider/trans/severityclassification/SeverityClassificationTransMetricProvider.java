@@ -18,9 +18,9 @@ import java.util.Set;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
-import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentsDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentDetectingCode;
 import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
-import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticlesDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode;
 import org.eclipse.scava.metricprovider.trans.newsgroups.threads.ThreadsTransMetricProvider;
 import org.eclipse.scava.metricprovider.trans.newsgroups.threads.model.ArticleData;
 import org.eclipse.scava.metricprovider.trans.newsgroups.threads.model.NewsgroupsThreadsTransMetric;
@@ -421,22 +421,22 @@ public class SeverityClassificationTransMetricProvider  implements ITransientMet
 	}
 	
 	private String naturalLanguageBugTrackerComment(DetectingCodeTransMetric db, BugTrackingSystemComment comment) {
-		BugTrackerCommentsDetectingCode bugtrackerCommentInDetectionCode = null;
-		Iterable<BugTrackerCommentsDetectingCode> bugtrackerCommentIt = db.getBugTrackerComments().
-				find(BugTrackerCommentsDetectingCode.BUGID.eq(comment.getBugId()),
-						BugTrackerCommentsDetectingCode.COMMENTID.eq(comment.getCommentId()));
-		for (BugTrackerCommentsDetectingCode btcdc:  bugtrackerCommentIt) {
+		BugTrackerCommentDetectingCode bugtrackerCommentInDetectionCode = null;
+		Iterable<BugTrackerCommentDetectingCode> bugtrackerCommentIt = db.getBugTrackerComments().
+				find(BugTrackerCommentDetectingCode.BUGID.eq(comment.getBugId()),
+						BugTrackerCommentDetectingCode.COMMENTID.eq(comment.getCommentId()));
+		for (BugTrackerCommentDetectingCode btcdc:  bugtrackerCommentIt) {
 			bugtrackerCommentInDetectionCode = btcdc;
 		}
 		return bugtrackerCommentInDetectionCode.getNaturalLanguage();
 	}
 	
 	private String naturalLanguageNewsgroupArticle(DetectingCodeTransMetric db, CommunicationChannelArticle article) {
-		NewsgroupArticlesDetectingCode newsgroupArticleInDetectionCode = null;
-		Iterable<NewsgroupArticlesDetectingCode> newsgroupArticleIt = db.getNewsgroupArticles().
-				find(NewsgroupArticlesDetectingCode.NEWSGROUPNAME.eq(article.getCommunicationChannel().getNewsGroupName()),
-						NewsgroupArticlesDetectingCode.ARTICLENUMBER.eq(article.getArticleNumber()));
-		for (NewsgroupArticlesDetectingCode nadc:  newsgroupArticleIt) {
+		NewsgroupArticleDetectingCode newsgroupArticleInDetectionCode = null;
+		Iterable<NewsgroupArticleDetectingCode> newsgroupArticleIt = db.getNewsgroupArticles().
+				find(NewsgroupArticleDetectingCode.NEWSGROUPNAME.eq(article.getCommunicationChannel().getNewsGroupName()),
+						NewsgroupArticleDetectingCode.ARTICLENUMBER.eq(article.getArticleNumber()));
+		for (NewsgroupArticleDetectingCode nadc:  newsgroupArticleIt) {
 			newsgroupArticleInDetectionCode = nadc;
 		}
 		return newsgroupArticleInDetectionCode.getNaturalLanguage();
