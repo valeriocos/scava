@@ -90,10 +90,10 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 		System.err.println("Started " + getIdentifier());
 		clearDB(db);
 		
-		PlainTextProcessingTransMetric preprocessor = ((PlainTextProcessingTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		PlainTextProcessingTransMetric plainTextProcessor = ((PlainTextProcessingTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
 		
 		//We obtain all the comments preprocessed by the Textpreprocessing Trans Metric
-		Iterable<BugTrackerCommentPlainTextProcessing> commentsIt = preprocessor.getBugTrackerComments();
+		Iterable<BugTrackerCommentPlainTextProcessing> commentsIt = plainTextProcessor.getBugTrackerComments();
 		
 		for (BugTrackerCommentPlainTextProcessing comment : commentsIt)
 		{
@@ -110,7 +110,7 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 			db.sync();
 		}
 		
-		Iterable<NewsgroupArticlePlainTextProcessing> articlesIt = preprocessor.getNewsgroupArticles();
+		Iterable<NewsgroupArticlePlainTextProcessing> articlesIt = plainTextProcessor.getNewsgroupArticles();
 		
 		for (NewsgroupArticlePlainTextProcessing article : articlesIt)
 		{

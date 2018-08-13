@@ -65,7 +65,6 @@ public class SentimentClassificationTransMetricProvider  implements ITransientMe
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
-		//return Collections.emptyList();
 		return Arrays.asList(DetectingCodeTransMetricProvider.class.getCanonicalName());
 	}
 

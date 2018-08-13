@@ -15,6 +15,7 @@ import org.eclipse.scava.repository.model.BugTrackingSystem;
 import org.eclipse.scava.workflow.restmule.generated.client.github.model.Issues;
 import org.eclipse.scava.workflow.restmule.generated.client.github.model.IssuesComments;
 import org.eclipse.scava.workflow.restmule.generated.client.github.model.PullRequest;
+import org.eclipse.scava.workflow.restmule.generated.client.github.model.PullsComment;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -33,7 +34,6 @@ public class GitHubReaderUtils {
 	 **/
 	public static GitHubIssue convertToGitHubIssue(Issues issue, BugTrackingSystem ghbt, Date day)  {
 		
-
 		GitHubIssue gitHubIssue = new GitHubIssue();
 		gitHubIssue.setBugTrackingSystem(ghbt);
 		gitHubIssue.setBugId(issue.getNumber().toString());
@@ -55,7 +55,8 @@ public class GitHubReaderUtils {
 	/**
 	 * Convert 'IssueComments' object to a GitHubComment object that is compatible with the BugTrackingSystem
 	 * 
-	 * @param issue
+	 * @param IssueComments
+	 * @param BugTrackingSystem
 	 * @return gitHubComment
 	 * 
 	 **/
@@ -74,6 +75,30 @@ public class GitHubReaderUtils {
 		return gitHubComment;
 	}
 	
+	
+	/**
+	 * Convert 'PullComment' object to a GitHubComment object that is compatible with the BugTrackingSystem
+	 * 
+	 * @param PullComment
+	 * @param BugTrackingSystem
+	 * @return gitHubComment
+	 * 
+	 **/
+	
+	public static GitHubComment convertToGitHubComment(PullsComment comment, BugTrackingSystem ghbt, Integer issueId){
+		GitHubComment gitHubComment = new GitHubComment();
+		
+		gitHubComment.setBugTrackingSystem(ghbt);
+		gitHubComment.setCommentId(comment.getId().toString());
+		gitHubComment.setCreator(comment.getUser().getId().toString());
+		gitHubComment.setCreationTime(convertStringToDate(comment.getCreatedAt()));
+		gitHubComment.setText(comment.getBody());
+		gitHubComment.setBugId(issueId.toString());
+		gitHubComment.setUpdatedAt(convertStringToDate(comment.getUpdatedAt()));
+		gitHubComment.setUrl(comment.getUrl());
+		
+		return gitHubComment;
+	}
 	/**
 	 * Convert 'Pulls' (PullRequest) object to a GitHubPullRequest object that is compatible with the BugTrackingSystem
 	 * 
