@@ -14,7 +14,7 @@ package org.eclipse.scava.repository.model.github;
 import com.mongodb.*;
 import java.util.*;
 //Adrián was here
-import com.googlecode.pongo.runtime.*;
+
 import com.googlecode.pongo.runtime.querying.*;
 
 // protected region custom-imports on begin

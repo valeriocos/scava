@@ -8,3 +8,6 @@ Automatic-Module-Name: org.eclipse.scava.nlp.preprocessor
 Export-Package: org.eclipse.scava.nlp.preprocessor.markdown.github,
  org.eclipse.scava.nlp.preprocessor.normalizer
 Require-Bundle: org.eclipse.scava.opennlp
+Bundle-ClassPath: lib/commonmark-0.11.0.jar,
+ lib/commonmark-ext-gfm-strikethrough-0.11.0.jar,
+ lib/commonmark-ext-gfm-tables-0.11.0.jar

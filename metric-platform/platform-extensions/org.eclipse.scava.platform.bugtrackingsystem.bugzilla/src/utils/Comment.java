@@ -24,14 +24,9 @@
  */
 package utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import org.eclipse.scava.nlp.codedetector.CodeDetector;
-import org.eclipse.scava.nlp.predictionmanager.Prediction;
+
 
 /**
  * The {@code Comment} class represents a comment entered for a particular
