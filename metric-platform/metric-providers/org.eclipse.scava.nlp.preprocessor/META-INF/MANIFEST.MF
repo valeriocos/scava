@@ -7,7 +7,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: org.eclipse.scava.nlp.preprocessor
 Export-Package: org.eclipse.scava.nlp.preprocessor.markdown.github,
  org.eclipse.scava.nlp.preprocessor.normalizer
-Require-Bundle: org.eclipse.scava.opennlp
-Bundle-ClassPath: lib/commonmark-0.11.0.jar,
- lib/commonmark-ext-gfm-strikethrough-0.11.0.jar,
- lib/commonmark-ext-gfm-tables-0.11.0.jar
+Require-Bundle: org.eclipse.scava.opennlp,
+ org.eclipse.core.runtime;bundle-version="3.13.0"
+Bundle-Activator: org.eclipse.scava.nlp.preprocessor.Activator
+Bundle-ActivationPolicy: lazy

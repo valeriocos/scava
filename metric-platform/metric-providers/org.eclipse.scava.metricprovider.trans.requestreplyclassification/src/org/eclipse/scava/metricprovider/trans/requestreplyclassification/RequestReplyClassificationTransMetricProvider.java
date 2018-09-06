@@ -138,7 +138,7 @@ public class RequestReplyClassificationTransMetricProvider  implements ITransien
 		Prediction prediction = RequestReplyDetector.predict(naturalLanguage);
 		if(prediction.getLabel().equals("__label__Question"))
 			return "Request";
-		else if(prediction.getLabel().equals("__lable__Reply"))
+		else if(prediction.getLabel().equals("__label__Reply"))
 			return "Reply";			
 		return null;
 	}
