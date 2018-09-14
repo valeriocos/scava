@@ -1,5 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2017 University of Manchester
+
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,9 +8,11 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+//Adrián was here
 package org.eclipse.scava.metricprovider.trans.newsgroups.threads;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +22,9 @@ import java.util.Set;
 
 import org.eclipse.scava.contentclassifier.opennlptartarus.libsvm.ClassificationInstance;
 import org.eclipse.scava.contentclassifier.opennlptartarus.libsvm.Classifier;
+import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode;
 import org.eclipse.scava.metricprovider.trans.newsgroups.threads.model.ArticleData;
 import org.eclipse.scava.metricprovider.trans.newsgroups.threads.model.CurrentDate;
 import org.eclipse.scava.metricprovider.trans.newsgroups.threads.model.NewsgroupData;
@@ -43,6 +49,9 @@ import com.mongodb.DB;
 public class ThreadsTransMetricProvider implements ITransientMetricProvider<NewsgroupsThreadsTransMetric>{
 
 	protected PlatformCommunicationChannelManager communicationChannelManager;
+	
+	protected List<IMetricProvider> uses;
+	protected MetricProviderContext context;
 
 	@Override
 	public String getIdentifier() {
@@ -60,16 +69,17 @@ public class ThreadsTransMetricProvider implements ITransientMetricProvider<News
 
 	@Override
 	public void setUses(List<IMetricProvider> uses) {
-		// DO NOTHING -- we don't use anything
+		this.uses = uses;
 	}
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
-		return Collections.emptyList();
+		return Arrays.asList(DetectingCodeTransMetricProvider.class.getCanonicalName());
 	}
 
 	@Override
 	public void setMetricProviderContext(MetricProviderContext context) {
+		this.context = context;
 		this.communicationChannelManager = context.getPlatformCommunicationChannelManager();
 	}
 
@@ -82,6 +92,15 @@ public class ThreadsTransMetricProvider implements ITransientMetricProvider<News
 	@Override
 	public void measure(Project project, ProjectDelta projectDelta, NewsgroupsThreadsTransMetric db) {
 
+		if (uses.size()!=getIdentifiersOfUses().size())
+		{
+			System.err.println("Metric: " + getIdentifier() + " failed to retrieve " + 
+								"the transient metrics it needs!");
+			System.exit(-1);
+		}
+		
+		DetectingCodeTransMetric detectingCodeMetric = ((DetectingCodeTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		
 		Iterable<CurrentDate> currentDateIt = db.getDate();
 		CurrentDate currentDate = null;
 		for (CurrentDate cd:  currentDateIt)
@@ -145,7 +164,7 @@ public class ThreadsTransMetricProvider implements ITransientMetricProvider<News
 					if (!articleExists) {
 						articles.add(prepareArticle(deltaArticle));
 						ClassificationInstance instance = 
-								prepareClassificationInstance(communicationChannelName, deltaArticle);
+								prepareClassificationInstance(communicationChannelName, deltaArticle, detectingCodeMetric);
 						instanceIndex.put(instance.getArticleNumber(), instance);
 					}
 				}
@@ -215,14 +234,29 @@ public class ThreadsTransMetricProvider implements ITransientMetricProvider<News
 		}
 		db.sync();
 	}
+	
+	private String getNaturalLanguage(CommunicationChannelArticle article, DetectingCodeTransMetric db)
+	{
+		NewsgroupArticleDetectingCode newsgroupArticleInDetectionCode = null;
+		Iterable<NewsgroupArticleDetectingCode> newsgroupArticleIt = db.getNewsgroupArticles().
+				find(NewsgroupArticleDetectingCode.NEWSGROUPNAME.eq(article.getCommunicationChannel().getNewsGroupName()),
+						NewsgroupArticleDetectingCode.ARTICLENUMBER.eq(article.getArticleNumber()));
+		for (NewsgroupArticleDetectingCode nadc:  newsgroupArticleIt) {
+			newsgroupArticleInDetectionCode = nadc;
+		}
+		if(newsgroupArticleInDetectionCode.getNaturalLanguage() != null)
+			return newsgroupArticleInDetectionCode.getNaturalLanguage();
+		else
+			return "";
+	}
 
-	private ClassificationInstance prepareClassificationInstance(
-			String communicationChannelName, CommunicationChannelArticle deltaArticle) {
+	private ClassificationInstance prepareClassificationInstance(String communicationChannelName, CommunicationChannelArticle article, DetectingCodeTransMetric db)
+	{
 		ClassificationInstance instance = new ClassificationInstance(); 
-		instance.setArticleNumber(deltaArticle.getArticleNumber());
+		instance.setArticleNumber(article.getArticleNumber());
 		instance.setNewsgroupName(communicationChannelName);
-		instance.setSubject(deltaArticle.getSubject());
-		instance.setText(deltaArticle.getText());
+		instance.setSubject(article.getSubject());
+		instance.setText(getNaturalLanguage(article, db));
 		return instance;
 	}
 
