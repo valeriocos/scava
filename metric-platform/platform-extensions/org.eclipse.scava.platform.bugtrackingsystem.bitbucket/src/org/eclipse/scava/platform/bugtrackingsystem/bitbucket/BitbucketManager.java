@@ -154,9 +154,9 @@ public class BitbucketManager implements
 		comment.setCommentId("11288353");
 		System.out.println(manager.getContents(null, bts, comment));
 
-		BugTrackingSystemDelta delta = manager.getDelta(null, bts, new Date(
-				"20140626"));
-		System.out.println(delta.getUpdatedBugs().size());
+//		BugTrackingSystemDelta delta = manager.getDelta(null, bts, new Date(
+//				"20140626"));
+//		System.out.println(delta.getUpdatedBugs().size());
 	}
 
 }
