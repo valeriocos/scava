@@ -12,10 +12,10 @@ package org.eclipse.scava.plugin.context.sourcecodestatus;
 
 import java.util.List;
 
-import org.scava.plugin.context.sourcecodestatus.astmanipulating.ASTUtils;
-import org.scava.commons.context.sourcecode.SourceCodeContext;
-import org.scava.commons.libraryapi.LibraryAPIElement;
-import org.scava.commons.transaction.APIUsageInContext;
+import org.eclipse.scava.plugin.context.sourcecodestatus.astmanipulating.ASTUtils;
+import org.eclipse.scava.commons.context.sourcecode.SourceCodeContext;
+import org.eclipse.scava.commons.libraryapi.LibraryAPIElement;
+import org.eclipse.scava.commons.transaction.APIUsageInContext;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
