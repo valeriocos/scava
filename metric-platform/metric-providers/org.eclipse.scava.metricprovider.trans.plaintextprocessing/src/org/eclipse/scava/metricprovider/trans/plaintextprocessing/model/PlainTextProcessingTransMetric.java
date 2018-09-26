@@ -34,6 +34,7 @@ public class PlainTextProcessingTransMetric extends PongoDB {
 		super.setDb(db);
 		bugTrackerComments = new BugTrackerCommentPlainTextProcessingCollection(db.getCollection("PlainTextProcessingTransMetric.bugTrackerComments"));
 		pongoCollections.add(bugTrackerComments);
+		
 		newsgroupArticles = new NewsgroupArticlePlainTextProcessingCollection(db.getCollection("PlainTextProcessingTransMetric.newsgroupArticles"));
 		pongoCollections.add(newsgroupArticles);
 	}

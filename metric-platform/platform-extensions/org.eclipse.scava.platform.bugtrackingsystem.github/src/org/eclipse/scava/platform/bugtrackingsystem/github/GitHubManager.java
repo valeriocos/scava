@@ -74,10 +74,12 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 
 		GitHubBugTrackingSystemDelta delta = new GitHubBugTrackingSystemDelta();
 		delta.setBugTrackingSystem(ghbt);
-
+		
 		getIssuesOnDay(ghbt, date, delta);
 		getPullRequestsOnDay(ghbt, date, delta);
 		getCommentsOnDay(ghbt, date, delta);
+		
+		
 		return delta;
 	}
 
@@ -168,7 +170,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 
 					gitHubIssue = GitHubReaderUtils.convertToGitHubIssue(issue, ghbt, today);
 
-					System.out.println("\t[Issue Created] " + issue.getCreatedAt() + "\t" + issue.getTitle());
+					System.out.println("\t[Issue Created] \t" + gitHubIssue.getBugId() + "\t"+ gitHubIssue.getCreationTime() + "\t" + issue.getTitle());
 
 					delta.getNewBugs().add(gitHubIssue);
 
@@ -452,7 +454,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 		// sets GitHubTracker Information
 		GitHubBugTracker ghbt = new GitHubBugTracker();
 		// ghbt.setProject(user, login, "dccw2097", repo, owner );
-		ghbt.setProject(user, login, "dccw2097", "scava", "crossminer");
+		ghbt.setProject(user, login, "dccw2097",  "paho.mqtt.java", "eclipse");
 
 		// creates new instances of...
 		GitHubBugTrackingSystemDelta delta = new GitHubBugTrackingSystemDelta();
@@ -465,7 +467,6 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 		Date on = ghm.getFirstDate(null, ghbt);
 
 		
-
 		Thread.sleep(10);// prevents console output bug
 
 		// simulates the getDelta functionality of the bugtracking system
@@ -509,7 +510,13 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 		System.out.println("[START]");
 		do {
 			System.err.println(on);
-			ghm.getDelta(null, ghbt, on);
+			
+			System.out.println(ghm.getDelta(null, ghbt, on).getNewBugs());
+			
+//			System.out.println("\t[Issue Created] \t" + ghm.getDelta(null, ghbt, on).getNewBugs());
+//			System.out.println("\t[Comment		] \t" + ghm.getDelta(null, ghbt, on).getComments());
+//			System.out.println("\t[Issue Updated] \t" + ghm.getDelta(null, ghbt, on).getUpdatedBugs());
+//			System.out.println("\t[Pull Request ] \t" + ghm.getDelta(null, ghbt, on));
 			on.addDays(1);
 		} while (on.compareTo(today) < 1);
 		System.out.println("[END]");

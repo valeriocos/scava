@@ -11,7 +11,6 @@ package org.eclipse.scava.platform.delta.communicationchannel;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import org.eclipse.scava.repository.model.cc.nntp.NntpNewsGroup;
 
 public class CommunicationChannelArticle implements Serializable {

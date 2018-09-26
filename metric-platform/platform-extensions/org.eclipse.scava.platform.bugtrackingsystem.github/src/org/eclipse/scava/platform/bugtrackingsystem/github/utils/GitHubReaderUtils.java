@@ -43,7 +43,7 @@ public class GitHubReaderUtils {
 		gitHubIssue.setUpdatedTime(issue);
 		gitHubIssue.setNumComments(issue);
 		gitHubIssue.addLabel(issue);
-		gitHubIssue.setMilestone(issue);
+		//gitHubIssue.setMilestone(issue);
 		gitHubIssue.setBody(issue);
 		gitHubIssue.setAssignee(issue);
 		gitHubIssue.setHtmlUrl(issue);
@@ -66,7 +66,7 @@ public class GitHubReaderUtils {
 		gitHubComment.setBugTrackingSystem(ghbt);
 		gitHubComment.setCommentId(comment.getId().toString());
 		gitHubComment.setCreator(comment.getUser().getId().toString());
-		gitHubComment.setCreationTime(convertStringToDate(comment.getCreatedAt()));
+		gitHubComment.setCreationTime(convertStringToDate(comment.getCreatedAt().trim()));
 		gitHubComment.setText(comment.getBody());
 		gitHubComment.setBugId(issueId.toString());
 		gitHubComment.setUpdatedAt(convertStringToDate(comment.getUpdatedAt()));

@@ -83,6 +83,7 @@ public class GitHubIssue extends BugTrackingSystemBug {
 	public void setMilestone(Issues issue) {
 		
 		try{
+		
 			int issueMilestone = Integer.parseInt(issue.getMilestone().toString().trim());
 			this.milestone = issueMilestone;
 		}catch (NullPointerException np){
