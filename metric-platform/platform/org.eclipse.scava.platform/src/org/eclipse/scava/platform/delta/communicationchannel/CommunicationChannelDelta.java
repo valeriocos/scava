@@ -7,6 +7,8 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+
+//Dan was Here
 package org.eclipse.scava.platform.delta.communicationchannel;
 
 import java.io.Serializable;
@@ -21,10 +23,16 @@ public class CommunicationChannelDelta  implements Serializable {
 	
 	transient protected CommunicationChannel communicationChannel;
 	protected List<CommunicationChannelArticle> articles = new ArrayList<CommunicationChannelArticle>();
+	protected List<CommuincationChannelForumPost> posts = new ArrayList<CommuincationChannelForumPost>();
 //	protected String latestArticleId;
 	
 	public CommunicationChannel getCommunicationChannel() {
 		return communicationChannel;
+	}
+	
+	
+	public void setCommunicationChannel(CommunicationChannel communicationChannel) {
+		this.communicationChannel = communicationChannel;
 	}
 	
 	public void setNewsgroup(CommunicationChannel communicationChannel) {
@@ -35,6 +43,10 @@ public class CommunicationChannelDelta  implements Serializable {
 		return articles;
 	}
 	
+	public List<CommuincationChannelForumPost> getPosts() {
+		return posts;
+	}
+
 //	public String getLatestArticleId() {
 //		return latestArticleId;
 //	}

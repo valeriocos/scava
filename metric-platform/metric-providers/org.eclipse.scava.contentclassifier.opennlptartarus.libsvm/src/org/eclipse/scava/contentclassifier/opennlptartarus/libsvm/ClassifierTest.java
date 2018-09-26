@@ -20,6 +20,8 @@ public class ClassifierTest {
     	int doc4 = 1004;
     	String sub1 = "the latest of a series of inconclusive Western moves";
     	String sub2 = "re: the latest of a series of inconclusive Western moves";
+    	String sub3 = "OpenCL support";
+    	
     	String text1 = "redirection forgot option mailbox";
     	String text2 = "Wot about Fig. 2 and (Fig. 3)? We created a myosinII-responsive FA interactome from proteins " +
         			  "in the expected FA list by color-coding proteins according to MDR magnitude (Supplemental Fig. " +
@@ -38,16 +40,21 @@ public class ClassifierTest {
         			  "(mENK), and cholecystokinin (CCK)-immunoreactive cells was determined within the RP3V of " +
         			  "colchicine-treated mice.";
     	
+    	
+    	String text3 = "It is in Google's interest to support OpenCL,\n" + 
+    			"by having a specific (company/brand/vendor)'s specific hardware as a dependency for your software, you enforce yourself to pay more for hardware, market competition lowers costs.\n" + 
+    			"Google has always been about commodity hardware since the very beginning which was and still crucial for Google's success (market dominance), having lower data center operating costs, enabled the revolutionary generous essentially free services offerings like Gmail (storage space) and Google Photos (storage space and auto-tagging).";
+    	
     	Classifier classifier = new Classifier();
 
     	ClassificationInstance classificationInstance1 = new ClassificationInstance();
         classificationInstance1.setNewsgroupName(newsgroupName);
         classificationInstance1.setArticleNumber(doc1);
-        classificationInstance1.setThreadId(1);
-        classificationInstance1.setPositionFromThreadBeginning(1);
+        classificationInstance1.setThreadId(4);
+        classificationInstance1.setPositionFromThreadBeginning(754);
 //        classificationInstance1.setPositionFromThreadEnd(2);
-        classificationInstance1.setSubject(sub1);
-        classificationInstance1.setText(text1);
+        classificationInstance1.setSubject(sub3);
+        classificationInstance1.setText(text3);
         classifier.add(classificationInstance1);
         
         ClassificationInstance classificationInstance2 = new ClassificationInstance();

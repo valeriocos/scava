@@ -3,8 +3,8 @@
 <plugin>
    <extension
          point="com.googlecode.pongo.runtime.osgi">
-      <class
-            name="org.eclipse.scava.repository.model.cc.eclipseforums.Pongo:2">
+          <class
+            name="org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum">
       </class>
    </extension>
 
