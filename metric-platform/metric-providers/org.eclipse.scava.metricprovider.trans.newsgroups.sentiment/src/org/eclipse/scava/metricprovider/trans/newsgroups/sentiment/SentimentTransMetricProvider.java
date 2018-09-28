@@ -104,13 +104,13 @@ public class SentimentTransMetricProvider  implements
 				((SentimentClassificationTransMetricProvider)uses.get(1)).adapt(context.getProjectDB(project));
 		
 		Map<String, String> articleSentiment = new HashMap<String, String>();
-		for (org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesData 
+		for (org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesSentimentClassification 
 				article: sentimentClassifier.getNewsgroupArticles())
 			articleSentiment.put(article.getNewsGroupName()+article.getArticleNumber(), 
 										article.getClassificationResult());
 
 		Map<String, String> articleEmotionalDimensions = new HashMap<String, String>();
-		for (org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesData 
+		for (org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesSentimentClassification 
 				article: sentimentClassifier.getNewsgroupArticles())
 			articleEmotionalDimensions.put(article.getNewsGroupName()+article.getArticleNumber(), 
 										article.getEmotionalDimensions());

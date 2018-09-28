@@ -23,7 +23,10 @@ class NewsgroupArticlePlainTextProcessing {
    	attr String[*] plainText;
 }
 
-class ForumPostPlainTextProcessing{
+class ForumPostPlainTextProcessing {
 	@searchable
-	
+	attr String forumId;
+	attr String topicId;
+	attr String postId;
+	attr String[*] plainText;  
 }

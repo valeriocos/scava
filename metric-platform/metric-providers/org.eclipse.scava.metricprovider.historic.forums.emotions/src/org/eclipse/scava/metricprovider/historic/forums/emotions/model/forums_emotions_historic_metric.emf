@@ -1,0 +1,25 @@
+package org.eclipse.scava.metricprovider.historic.forums.emotions.model;
+
+class ForumsEmotionsHistoricMetric {
+	val Forums[*] forums;
+	val Emotion[*] emotions;
+}
+
+class Forums {
+   	attr String forumId;
+   	attr String topicId;	
+   	attr int numberOfPosts;
+	attr int cumulativeNumberOfPosts;
+}
+
+
+class Emotion {
+   	attr String forumId;
+   	attr String topicId;
+   	attr String emotionLabel;
+	attr int numberOfPosts;
+	attr int cumulativeNumberOfPosts;
+	attr float percentage;
+	attr float cumulativePercentage;
+}
+

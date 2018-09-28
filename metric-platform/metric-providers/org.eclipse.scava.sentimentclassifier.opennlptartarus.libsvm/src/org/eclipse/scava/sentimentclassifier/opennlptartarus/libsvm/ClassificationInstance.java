@@ -7,6 +7,7 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+//Adrián was here
 package org.eclipse.scava.sentimentclassifier.opennlptartarus.libsvm;
 
 import java.util.ArrayList;
@@ -35,6 +36,11 @@ public class ClassificationInstance {
 	private String newsgroupName;
 	private int articleNumber;
 	private String subject;
+	
+	private String forumId;
+	private String topicId;
+	private String postId;
+	
 	private List<List<Token>> tokenSentences;
 	private List<List<Token>> cleanTokenSentences;
 
@@ -111,6 +117,10 @@ public class ClassificationInstance {
 			composedId = bugTrackerId+"#"+bugId+"#"+commentId;
 		else if ((newsgroupName!=null)&&(articleNumber!=0)) 
 			composedId = newsgroupName+"#"+articleNumber;
+		//else if ((forumId != null) && (topicId!=null) && (postId!=null)) //Modified version for the future
+		//	composedId = forumId + "#" +topicId + "#" + postId;
+		else if ((topicId!=null) && (postId!=null))
+			composedId = topicId + "#" + postId;
 		else {
 			System.err.println("Unable to compose ID");
 		}
@@ -133,6 +143,27 @@ public class ClassificationInstance {
 	public void setNewsgroupName(String newsgroupName) {
 		this.newsgroupName = newsgroupName;
 		if (composedId!=null) setComposedId();
+	}
+	
+	public String getForumId()
+	{
+		return forumId;
+	}
+	
+	public void setForumId(String forumId)
+	{
+		this.forumId = forumId;
+		if(composedId!=null) setComposedId();
+	}
+	
+	public String getTopicId() {
+		return topicId;
+	}
+	
+	public void setTopicId(String topicId)
+	{
+		this.topicId = topicId;
+		if(composedId!=null) setComposedId();
 	}
 
 	public String getBugId() {
@@ -162,6 +193,15 @@ public class ClassificationInstance {
 	
 	public void setArticleNumber(int articleNumber) {
 		this.articleNumber = articleNumber;
+		if (composedId!=null) setComposedId();
+	}
+	
+	public String getPostId() {
+		return postId;
+	}
+	
+	public void setPostId(String postId) {
+		this.postId = postId;
 		if (composedId!=null) setComposedId();
 	}
 	

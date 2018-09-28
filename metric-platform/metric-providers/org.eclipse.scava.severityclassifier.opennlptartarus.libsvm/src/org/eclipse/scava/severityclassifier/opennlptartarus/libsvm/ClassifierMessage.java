@@ -7,6 +7,7 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+//Adrián was here
 package org.eclipse.scava.severityclassifier.opennlptartarus.libsvm;
 
 
@@ -20,6 +21,9 @@ public class ClassifierMessage {
 	private int threadId;
 	private int articleNumber;
 	private String subject;
+	
+	private String forumId;
+	private String postId;
 
 	private String text;
 	private String composedId;
@@ -37,6 +41,8 @@ public class ClassifierMessage {
 			composedId = bugTrackerId+"#"+bugId;
 		else if ((newsgroupName!=null)&&(threadId!=0)) 
 			composedId = newsgroupName+"#"+threadId;
+		else if ((forumId != null) && (postId!=null))
+			composedId = forumId + "#" + postId;
 		else {
 			System.err.println("Unable to compose ID");
 		}
@@ -60,6 +66,17 @@ public class ClassifierMessage {
 		this.newsgroupName = newsgroupName;
 		if (composedId!=null) setComposedId();
 	}
+	
+	public String getForumId()
+	{
+		return forumId;
+	}
+	
+	public void setForumId(String forumId)
+	{
+		this.forumId = forumId;
+		if (composedId!=null) setComposedId();
+	}
 
 	public String getBugId() {
 		return bugId;
@@ -76,6 +93,17 @@ public class ClassifierMessage {
 
 	public void setCommentId(String commentId) {
 		this.commentId = commentId;
+		if (composedId!=null) setComposedId();
+	}
+	
+	public String getPostId()
+	{
+		return postId;
+	}
+	
+	public void setPostId(String postId)
+	{
+		this.postId = postId;
 		if (composedId!=null) setComposedId();
 	}
 

@@ -15,13 +15,10 @@ public class CommuincationChannelForumPost implements Serializable {
 	private String user;
 	private Date date;
 	private String PostId;
+	private String forumId;
+	
+	
 	transient private CommunicationChannel communicationChannel;// need to modify
-	
-	
-	
-
-	
-	
 	
 	public CommunicationChannel getCommunicationChannel() {
 		return communicationChannel;
@@ -29,7 +26,6 @@ public class CommuincationChannelForumPost implements Serializable {
 	public void setCommunicationChannel(CommunicationChannel communicationChannel) {
 		this.communicationChannel = communicationChannel;
 	}
-	private String forumId;
 	
 	
 	public String getPostId() {

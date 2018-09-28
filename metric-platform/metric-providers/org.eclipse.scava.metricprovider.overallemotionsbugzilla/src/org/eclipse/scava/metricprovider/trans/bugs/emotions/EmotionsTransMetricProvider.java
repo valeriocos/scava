@@ -7,14 +7,18 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+//Adrián was here
 package org.eclipse.scava.metricprovider.trans.bugs.emotions;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.scava.metricprovider.trans.bugs.emotions.model.BugTrackerData;
 import org.eclipse.scava.metricprovider.trans.bugs.emotions.model.BugsEmotionsTransMetric;
 import org.eclipse.scava.metricprovider.trans.bugs.emotions.model.EmotionDimension;
+import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentDetectingCode;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
 import org.eclipse.scava.platform.IMetricProvider;
 import org.eclipse.scava.platform.ITransientMetricProvider;
 import org.eclipse.scava.platform.MetricProviderContext;
@@ -33,6 +37,9 @@ import com.mongodb.DB;
 public class EmotionsTransMetricProvider implements ITransientMetricProvider<BugsEmotionsTransMetric>{
 
 	protected PlatformBugTrackingSystemManager platformBugTrackingSystemManager;
+	
+	protected List<IMetricProvider> uses;
+	protected MetricProviderContext context;
 
 	@Override
 	public String getIdentifier() {
@@ -46,16 +53,17 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<Bug
 
 	@Override
 	public void setUses(List<IMetricProvider> uses) {
-		// DO NOTHING -- we don't use anything
+		this.uses = uses;
 	}
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
-		return Collections.emptyList();
+		return Arrays.asList(DetectingCodeTransMetricProvider.class.getCanonicalName());
 	}
 
 	@Override
 	public void setMetricProviderContext(MetricProviderContext context) {
+		this.context = context;
 		this.platformBugTrackingSystemManager = context.getPlatformBugTrackingSystemManager();
 	}
 
@@ -66,6 +74,9 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<Bug
 
 	@Override
 	public void measure(Project project, ProjectDelta projectDelta, BugsEmotionsTransMetric db) {
+		
+		DetectingCodeTransMetric detectingCodeMetric = ((DetectingCodeTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		
 		BugTrackingSystemProjectDelta delta = projectDelta.getBugTrackingSystemDelta();
 		
 		for (BugTrackingSystemDelta bugTrackingSystemDelta : delta.getBugTrackingSystemDeltas()) {
@@ -100,12 +111,7 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<Bug
 				instance.setBugTrackerId(bugTracker.getOSSMeterId());
 				instance.setBugId(comment.getBugId());
 				instance.setCommentId(comment.getCommentId());
-				
-				if (comment.getText() == null) {
-					instance.setText("");
-				} else {
-					instance.setText(comment.getText());
-				}
+				instance.setText(getNaturalLanguage(detectingCodeMetric, comment));
 				
 				String[] emotionalDimensions = EmotionalDimensions.getDimensions(instance).split(",");
 				
@@ -168,6 +174,21 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<Bug
 	@Override
 	public String getSummaryInformation() {
 		return "Emotional Dimensions in Bug Comments";
+	}
+	
+	private String getNaturalLanguage(DetectingCodeTransMetric db, BugTrackingSystemComment comment)
+	{
+		BugTrackerCommentDetectingCode bugtrackerCommentInDetectionCode = null;
+		Iterable<BugTrackerCommentDetectingCode> bugtrackerCommentIt = db.getBugTrackerComments().
+				find(BugTrackerCommentDetectingCode.BUGID.eq(comment.getBugId()),
+						BugTrackerCommentDetectingCode.COMMENTID.eq(comment.getCommentId()));
+		for (BugTrackerCommentDetectingCode btcdc:  bugtrackerCommentIt) {
+			bugtrackerCommentInDetectionCode = btcdc;
+		}
+		if (bugtrackerCommentInDetectionCode.getNaturalLanguage() == null)
+			return "";
+		else
+			return bugtrackerCommentInDetectionCode.getNaturalLanguage();
 	}
 
 }

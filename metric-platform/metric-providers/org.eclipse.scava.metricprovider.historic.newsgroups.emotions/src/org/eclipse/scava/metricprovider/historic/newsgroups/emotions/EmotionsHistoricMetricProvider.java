@@ -99,16 +99,16 @@ public class EmotionsHistoricMetricProvider extends AbstractHistoricalMetricProv
 
 	@Override
 	public String getShortIdentifier() {
-		return "bugemotions";
+		return "newsgroupsemotions";
 	}
 
 	@Override
 	public String getFriendlyName() {
-		return "Number Of Bug Emotions Per Day";
+		return "Number Of Newsgroups Emotions Per Day";
 	}
 
 	@Override
 	public String getSummaryInformation() {
-		return "This metric computes the number of emotional dimensions in comments submitted every day.";
+		return "This metric computes the number of emotional dimensions in articles submitted every day.";
 	}
 }

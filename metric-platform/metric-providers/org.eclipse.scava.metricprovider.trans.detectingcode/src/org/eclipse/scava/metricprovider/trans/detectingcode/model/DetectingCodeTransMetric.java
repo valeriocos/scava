@@ -15,6 +15,7 @@ public class DetectingCodeTransMetric extends PongoDB {
 	
 	protected BugTrackerCommentDetectingCodeCollection bugTrackerComments = null;
 	protected NewsgroupArticleDetectingCodeCollection newsgroupArticles = null;
+	protected ForumPostDetectingCodeCollection forumPosts = null;
 	
 	// protected region custom-fields-and-methods on begin
 	// protected region custom-fields-and-methods end
@@ -28,6 +29,10 @@ public class DetectingCodeTransMetric extends PongoDB {
 		return newsgroupArticles;
 	}
 	
+	public ForumPostDetectingCodeCollection getForumPosts() {
+		return forumPosts;
+	}
+	
 	
 	@Override
 	public void setDb(DB db) {
@@ -36,5 +41,7 @@ public class DetectingCodeTransMetric extends PongoDB {
 		pongoCollections.add(bugTrackerComments);
 		newsgroupArticles = new NewsgroupArticleDetectingCodeCollection(db.getCollection("DetectingCodeTransMetric.newsgroupArticles"));
 		pongoCollections.add(newsgroupArticles);
+		forumPosts = new ForumPostDetectingCodeCollection(db.getCollection("DetectingCodeTransMetric.forumPosts"));
+		pongoCollections.add(forumPosts);
 	}
 }

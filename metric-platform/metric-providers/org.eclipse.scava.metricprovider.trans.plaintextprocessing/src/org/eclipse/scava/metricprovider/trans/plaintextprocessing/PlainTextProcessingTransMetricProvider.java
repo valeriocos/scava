@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.BugTrackerCommentPlainTextProcessing;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.ForumPostPlainTextProcessing;
 import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.NewsgroupArticlePlainTextProcessing;
 import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.PlainTextProcessingTransMetric;
 import org.eclipse.scava.nlp.htmlparser.HtmlParser;
@@ -19,6 +20,7 @@ import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemComme
 import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemDelta;
 import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemProjectDelta;
 import org.eclipse.scava.platform.delta.bugtrackingsystem.PlatformBugTrackingSystemManager;
+import org.eclipse.scava.platform.delta.communicationchannel.CommuincationChannelForumPost;
 import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelArticle;
 import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelDelta;
 import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelProjectDelta;
@@ -26,6 +28,7 @@ import org.eclipse.scava.platform.delta.communicationchannel.PlatformCommunicati
 import org.eclipse.scava.repository.model.BugTrackingSystem;
 import org.eclipse.scava.repository.model.CommunicationChannel;
 import org.eclipse.scava.repository.model.Project;
+import org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum;
 import org.eclipse.scava.repository.model.cc.nntp.NntpNewsGroup;
 import org.eclipse.scava.repository.model.sourceforge.Discussion;
 
@@ -37,6 +40,8 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 	protected PlatformCommunicationChannelManager communicationChannelManager;
 	
 	private Pattern newline = Pattern.compile("\\v+");
+	private Pattern escapedNewline = Pattern.compile("(\\\\n|\\\\r)");
+	private Pattern br = Pattern.compile("<br />");
 	
 	@Override
 	public String getIdentifier() {
@@ -64,6 +69,7 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 		for (CommunicationChannel communicationChannel: project.getCommunicationChannels()) {
 			if (communicationChannel instanceof NntpNewsGroup) return true;
 			if (communicationChannel instanceof Discussion) return true;
+			if (communicationChannel instanceof EclipseForum) return true;
 		}
 		return !project.getBugTrackingSystems().isEmpty();
 	}
@@ -110,6 +116,7 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 				List<String> plainText = new ArrayList<String>();
 				switch(bugTracker.getBugTrackerType())
 				{
+					//case "bitbucket" might be the same as GitHub
 					case "github": plainText=processGitHub(comment.getText()); break;
 					case "bugzilla": plainText=processBugzilla(comment.getText()); break;
 					//case "jira":
@@ -125,24 +132,44 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 		CommunicationChannelProjectDelta ccpDelta = projectDelta.getCommunicationChannelDelta();
 		for ( CommunicationChannelDelta communicationChannelDelta: ccpDelta.getCommunicationChannelSystemDeltas()) {
 			CommunicationChannel communicationChannel = communicationChannelDelta.getCommunicationChannel();
-			String communicationChannelName;
-			if (!(communicationChannel instanceof NntpNewsGroup))
-				communicationChannelName = communicationChannel.getUrl();
-			else {
-				NntpNewsGroup newsgroup = (NntpNewsGroup) communicationChannel;
-				communicationChannelName = newsgroup.getNewsGroupName();
-			}
-			for (CommunicationChannelArticle article: communicationChannelDelta.getArticles()) {
-				NewsgroupArticlePlainTextProcessing newsgroupArticlesData = 
-						findNewsgroupArticle(db, communicationChannelName, article);
-				if (newsgroupArticlesData == null) {
-					newsgroupArticlesData = new NewsgroupArticlePlainTextProcessing();
-					newsgroupArticlesData.setNewsGroupName(communicationChannelName);
-					newsgroupArticlesData.setArticleNumber(article.getArticleNumber());
-					db.getNewsgroupArticles().add(newsgroupArticlesData);
+			//Process for forums
+			if(communicationChannel instanceof EclipseForum)
+			{
+				for(CommuincationChannelForumPost post : communicationChannelDelta.getPosts())
+				{
+					ForumPostPlainTextProcessing forumPostsData = findForumPost(db, post);
+					if(forumPostsData == null)
+					{
+						forumPostsData = new ForumPostPlainTextProcessing();
+						forumPostsData.setTopicId(post.getForumId());//To change in the future
+						forumPostsData.setPostId(post.getPostId());
+						db.getForumPosts().add(forumPostsData);
+					}
+					List<String> plainText = processHTML(post.getText());
+					forumPostsData.setPlainText(plainText);
 				}
-				List<String> plainText = processPlainText(article.getText());
-				newsgroupArticlesData.setPlainText(plainText);
+			}
+			else
+			{
+				String communicationChannelName;
+				if (!(communicationChannel instanceof NntpNewsGroup))
+					communicationChannelName = communicationChannel.getUrl();
+				else {
+					NntpNewsGroup newsgroup = (NntpNewsGroup) communicationChannel;
+					communicationChannelName = newsgroup.getNewsGroupName();
+				}
+				for (CommunicationChannelArticle article: communicationChannelDelta.getArticles()) {
+					NewsgroupArticlePlainTextProcessing newsgroupArticlesData = 
+							findNewsgroupArticle(db, communicationChannelName, article);
+					if (newsgroupArticlesData == null) {
+						newsgroupArticlesData = new NewsgroupArticlePlainTextProcessing();
+						newsgroupArticlesData.setNewsGroupName(communicationChannelName);
+						newsgroupArticlesData.setArticleNumber(article.getArticleNumber());
+						db.getNewsgroupArticles().add(newsgroupArticlesData);
+					}
+					List<String> plainText = processPlainText(article.getText());
+					newsgroupArticlesData.setPlainText(plainText);
+				}
 			}
 			db.sync();
 		}
@@ -159,7 +186,7 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 		text = MarkdownParserGitHub.parse(text);
 		//We need to delete the extra newlines again before parsing the text
 		text=newline.matcher(text).replaceAll("");
-		return HtmlParser.parse(text);
+		return processHTML(text);
 	}
 	
 	@Deprecated
@@ -168,6 +195,13 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 	{
 		List<String> textLines = Arrays.asList(text.split("\\h\\h+"));
 		return textLines;
+	}
+	
+	private List<String> processHTML(String text)
+	{
+		//In case the text contain escaped newlines
+		text=escapedNewline.matcher(text).replaceAll("");
+		return HtmlParser.parse(text);
 	}
 	
 	private List<String> processPlainText(String text)
@@ -179,6 +213,7 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 	private void clearDB(PlainTextProcessingTransMetric db) {
 		db.getBugTrackerComments().getDbCollection().drop();
 		db.getNewsgroupArticles().getDbCollection().drop();
+		db.getForumPosts().getDbCollection().drop();
 		db.sync();
 	}
 
@@ -208,5 +243,17 @@ public class PlainTextProcessingTransMetricProvider implements ITransientMetricP
 			newsgroupArticlesData = nad;
 		}
 		return newsgroupArticlesData;
+	}
+	
+	private ForumPostPlainTextProcessing findForumPost(PlainTextProcessingTransMetric db, CommuincationChannelForumPost post) {
+		ForumPostPlainTextProcessing forumPostsData = null;
+		Iterable<ForumPostPlainTextProcessing> forumPostsDataIt = 
+		db.getForumPosts().
+				find(ForumPostPlainTextProcessing.TOPICID.eq(post.getForumId()), 
+						ForumPostPlainTextProcessing.POSTID.eq(post.getPostId()));
+		for (ForumPostPlainTextProcessing fpd:  forumPostsDataIt) {
+			forumPostsData = fpd;
+		}
+		return forumPostsData;
 	}
 }

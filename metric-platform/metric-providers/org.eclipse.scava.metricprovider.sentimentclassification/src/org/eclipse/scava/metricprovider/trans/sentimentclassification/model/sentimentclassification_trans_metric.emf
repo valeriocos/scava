@@ -3,11 +3,12 @@ package org.eclipse.scava.metricprovider.trans.sentimentclassification.model;
 @db(qualifiedCollectionNames="true")
 @customize
 class SentimentClassificationTransMetric {
-	val BugTrackerCommentsData[*] bugTrackerComments;
-	val NewsgroupArticlesData[*] newsgroupArticles;
+	val BugTrackerCommentsSentimentClassification[*] bugTrackerComments;
+	val NewsgroupArticlesSentimentClassification[*] newsgroupArticles;
+	val ForumPostDetectingSentimentClassification[*] forumPosts;
 }
 
-class BugTrackerCommentsData {
+class BugTrackerCommentsSentimentClassification {
 	@searchable
    	attr String bugTrackerId;
    	attr String bugId;
@@ -16,10 +17,17 @@ class BugTrackerCommentsData {
    	attr String emotionalDimensions;
 }
 
-class NewsgroupArticlesData {
+class NewsgroupArticlesSentimentClassification {
 	@searchable
    	attr String newsGroupName;
    	attr int articleNumber;
    	attr String classificationResult;
    	attr String emotionalDimensions;
+}
+
+class ForumPostDetectingSentimentClassification {
+	attr String forumId;
+	attr String postId;
+	attr String classificationResult;
+	attr String emotionalDimensions;
 }

@@ -7,6 +7,7 @@
  * 
  * SPDX-License-Identifier: EPL-2.0
  ******************************************************************************/
+//Adrián was here
 package org.eclipse.scava.contentclassifier.opennlptartarus.libsvm;
 
 import java.util.List;
@@ -23,9 +24,14 @@ public class ClassificationInstance {
 	private String newsgroupName;
 	private int articleNumber;
 	private int threadId;
+	
+	private String forumId;
+	private String topicId;
+	private String postId;
+	
 	private int positionFromThreadBeginning;
-//	private int positionFromThreadEnd;
 	private String subject;
+	
 	private List<List<Token>> tokenSentences;
 	private List<List<Token>> cleanTokenSentences;
 
@@ -45,6 +51,8 @@ public class ClassificationInstance {
 			composedId = bugTrackerId+"#"+bugId+"#"+commentId;
 		else if ((newsgroupName!=null)&&(articleNumber!=0)) 
 			composedId = newsgroupName+"#"+articleNumber;
+		else if ((topicId != null) && (postId != null))
+			composedId = topicId + "#" + postId;
 		else {
 			System.err.println("Unable to compose ID");
 		}
@@ -68,6 +76,15 @@ public class ClassificationInstance {
 		this.newsgroupName = newsgroupName;
 		if (composedId!=null) setComposedId();
 	}
+	
+	public String getForumId()	{
+		return forumId;
+	}
+	
+	public void setForumId(String forumId) {
+		this.forumId = forumId;
+		if (composedId!=null) setComposedId();
+	}
 
 	public String getBugId() {
 		return bugId;
@@ -77,18 +94,24 @@ public class ClassificationInstance {
 		this.bugId = bugId;
 		if (composedId!=null) setComposedId();
 	}
-
+	
+	public String getTopicId() {
+		return topicId;
+	}
+	
+	public void setTopicId(String topicId) {
+		this.topicId = topicId;
+		if (composedId!=null) setComposedId();
+	}
 
 	public String getCommentId() {
 		return commentId;
 	}
 
-
 	public void setCommentId(String commentId) {
 		this.commentId = commentId;
 		if (composedId!=null) setComposedId();
 	}
-
 
 	public int getArticleNumber() {
 		return articleNumber;
@@ -96,6 +119,15 @@ public class ClassificationInstance {
 	
 	public void setArticleNumber(int articleNumber) {
 		this.articleNumber = articleNumber;
+		if (composedId!=null) setComposedId();
+	}
+	
+	public String getPostId() {
+		return postId;
+	}
+	
+	public void setPostId(String postId) {
+		this.postId = postId;
 		if (composedId!=null) setComposedId();
 	}
 	
@@ -114,14 +146,6 @@ public class ClassificationInstance {
 	public void setPositionFromThreadBeginning(int positionFromThreadBeginning) {
 		this.positionFromThreadBeginning = positionFromThreadBeginning;
 	}
-
-//	public int getPositionFromThreadEnd() {
-//		return positionFromThreadEnd;
-//	}
-
-//	public void setPositionFromThreadEnd(int positionFromThreadEnd) {
-//		this.positionFromThreadEnd = positionFromThreadEnd;
-//	}
 
 	public String getSubject() {
 		return subject;

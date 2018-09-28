@@ -11,6 +11,7 @@
          <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric"/>
          <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.BugTrackerCommentDetectingCode"/>
          <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode"/>
+         <class name="org.eclipse.scava.metricprovider.trans.detectingcode.model.ForumPostDetectingCode"/>
    </extension>
 
 </plugin>

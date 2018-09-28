@@ -15,6 +15,7 @@ public class PlainTextProcessingTransMetric extends PongoDB {
 	
 	protected BugTrackerCommentPlainTextProcessingCollection bugTrackerComments = null;
 	protected NewsgroupArticlePlainTextProcessingCollection newsgroupArticles = null;
+	protected ForumPostPlainTextProcessingCollection forumPosts = null;
 	
 	// protected region custom-fields-and-methods on begin
 	// protected region custom-fields-and-methods end
@@ -28,14 +29,19 @@ public class PlainTextProcessingTransMetric extends PongoDB {
 		return newsgroupArticles;
 	}
 	
+	public ForumPostPlainTextProcessingCollection getForumPosts() {
+		return forumPosts;
+	}
+	
 	
 	@Override
 	public void setDb(DB db) {
 		super.setDb(db);
 		bugTrackerComments = new BugTrackerCommentPlainTextProcessingCollection(db.getCollection("PlainTextProcessingTransMetric.bugTrackerComments"));
 		pongoCollections.add(bugTrackerComments);
-		
 		newsgroupArticles = new NewsgroupArticlePlainTextProcessingCollection(db.getCollection("PlainTextProcessingTransMetric.newsgroupArticles"));
 		pongoCollections.add(newsgroupArticles);
+		forumPosts = new ForumPostPlainTextProcessingCollection(db.getCollection("PlainTextProcessingTransMetric.forumPosts"));
+		pongoCollections.add(forumPosts);
 	}
 }

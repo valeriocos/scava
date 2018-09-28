@@ -60,16 +60,13 @@ public class BugTrackerCommentPlainTextProcessing extends Pongo {
 		}
 		return plainText;
 	}
-
+	
 	//Method by Adrián
 	public BugTrackerCommentPlainTextProcessing setPlainText(List<String> plainText) {
 		dbObject.put("plainText", plainText);
 		this.plainText = plainText;
 		notifyChanged();
-		return this;
-		
+		return this;	
 	}
-	
-	
 	
 }

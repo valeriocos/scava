@@ -49,16 +49,12 @@ public class NewsgroupArticlePlainTextProcessing extends Pongo {
 		}
 		return plainText;
 	}
-
-	//Method by Adrián
-	public NewsgroupArticlePlainTextProcessing setPlainText(List<String> plainText)
-	{
+	
+	public NewsgroupArticlePlainTextProcessing setPlainText(List<String> plainText) {
 		dbObject.put("plainText", plainText);
 		this.plainText = plainText;
 		notifyChanged();
-		return this;
+		return this;	
 	}
-	
-	
 	
 }

@@ -8,21 +8,19 @@
   
   SPDX-License-Identifier: EPL-2.0
 -->
-<?eclipse version="3.4"?><plugin>
+<!--Adrián was here
+-->
+<?eclipse version="3.4"?>
+<plugin>
 	<extension point="org.eclipse.scava.platform.metricprovider">
    		<metricProvider provider="org.eclipse.scava.metricprovider.trans.sentimentclassification.SentimentClassificationTransMetricProvider">
    		</metricProvider>
 	</extension>
-	
 
-
-
-
-
-
-<extension point="com.googlecode.pongo.runtime.osgi">
-    <class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.SentimentClassificationTransMetric"/>
-    <class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.BugTrackerCommentsData"/>
-    <class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesData"/>
-  </extension>
+	<extension point="com.googlecode.pongo.runtime.osgi">
+		<class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.SentimentClassificationTransMetric"/>
+		<class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.BugTrackerCommentsSentimentClassification"/>
+		<class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.NewsgroupArticlesSentimentClassification"/>
+		<class name="org.eclipse.scava.metricprovider.trans.sentimentclassification.model.ForumPostDetectingSentimentClassification"/>
+	</extension>
 </plugin>

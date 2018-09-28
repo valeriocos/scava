@@ -1,0 +1,16 @@
+package org.eclipse.scava.metricprovider.trans.forums.sentiment.model;
+
+@db(qualifiedCollectionNames="true")
+class ForumsSentimentTransMetric {
+	val ThreadStatistics[*] threads;
+}    
+
+class ThreadStatistics {
+   @searchable
+   attr String newsgroupName;
+   @searchable
+   attr int threadId;
+   attr float averageSentiment;
+   attr String startSentiment; 
+   attr String endSentiment; 
+}

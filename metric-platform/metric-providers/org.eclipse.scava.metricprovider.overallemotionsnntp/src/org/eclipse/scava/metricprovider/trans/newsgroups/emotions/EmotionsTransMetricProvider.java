@@ -9,9 +9,12 @@
  ******************************************************************************/
 package org.eclipse.scava.metricprovider.trans.newsgroups.emotions;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.NewsgroupArticleDetectingCode;
 import org.eclipse.scava.metricprovider.trans.newsgroups.emotions.model.EmotionDimension;
 import org.eclipse.scava.metricprovider.trans.newsgroups.emotions.model.NewsgroupData;
 import org.eclipse.scava.metricprovider.trans.newsgroups.emotions.model.NewsgroupsEmotionsTransMetric;
@@ -56,12 +59,12 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<New
 
 	@Override
 	public void setUses(List<IMetricProvider> uses) {
-		// DO NOTHING -- we don't use anything
+		this.uses = uses;
 	}
 
 	@Override
 	public List<String> getIdentifiersOfUses() {
-		return Collections.emptyList();
+		return Arrays.asList(DetectingCodeTransMetricProvider.class.getCanonicalName());
 	}
 
 	@Override
@@ -77,9 +80,11 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<New
 
 	@Override
 	public void measure(Project project, ProjectDelta projectDelta, NewsgroupsEmotionsTransMetric db) {
+		
+		DetectingCodeTransMetric detectingCodeMetric = ((DetectingCodeTransMetricProvider)uses.get(0)).adapt(context.getProjectDB(project));
+		
 		CommunicationChannelProjectDelta delta = projectDelta.getCommunicationChannelDelta();
 		
-
 		for (CommunicationChannelDelta communicationChannelSystemDelta : delta.getCommunicationChannelSystemDeltas()) {
 			CommunicationChannel communicationChannel = communicationChannelSystemDelta.getCommunicationChannel();
 			String communicationChannelName;
@@ -117,7 +122,7 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<New
 				ClassificationInstance instance = new ClassificationInstance();
 				instance.setArticleNumber(article.getArticleNumber());
 				instance.setNewsgroupName(communicationChannelName);
-				instance.setText(article.getText());
+				instance.setText(getNaturalLanguage(detectingCodeMetric, article));
 				
 				String[] emotionalDimensions = 
 						EmotionalDimensions.getDimensions(instance).split(",");
@@ -181,6 +186,20 @@ public class EmotionsTransMetricProvider implements ITransientMetricProvider<New
 	@Override
 	public String getSummaryInformation() {
 		return "Emotional Dimensions in Newsgroup Articles";
+	}
+	
+	private String getNaturalLanguage(DetectingCodeTransMetric db, CommunicationChannelArticle article) {
+		NewsgroupArticleDetectingCode newsgroupArticleInDetectionCode = null;
+		Iterable<NewsgroupArticleDetectingCode> newsgroupArticleIt = db.getNewsgroupArticles().
+				find(NewsgroupArticleDetectingCode.NEWSGROUPNAME.eq(article.getCommunicationChannel().getNewsGroupName()),
+						NewsgroupArticleDetectingCode.ARTICLENUMBER.eq(article.getArticleNumber()));
+		for (NewsgroupArticleDetectingCode nadc:  newsgroupArticleIt) {
+			newsgroupArticleInDetectionCode = nadc;
+		}
+		if (newsgroupArticleInDetectionCode.getNaturalLanguage() == null)
+			return "";
+		else
+			return newsgroupArticleInDetectionCode.getNaturalLanguage();
 	}
 
 }

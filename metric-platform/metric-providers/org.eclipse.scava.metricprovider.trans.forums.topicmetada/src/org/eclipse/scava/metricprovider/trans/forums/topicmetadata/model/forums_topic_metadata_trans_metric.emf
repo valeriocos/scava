@@ -1,0 +1,30 @@
+package org.eclipse.scava.metricprovider.trans.forums.topicmetadata.model;
+
+@db(qualifiedCollectionNames="true")
+@customize
+class ForumsTopicMetadataTransMetric {
+	val TopicData[*] topicData;
+	val PostData[*] posts;
+}
+
+class TopicData {
+	@searchable
+	attr String forumId;
+	attr String topicId;
+	attr String priority;
+	attr String creationDate;
+	attr float averageSentiment;
+	attr String startSentiment; 
+	attr String endSentiment; 
+}
+
+class PostData {
+	@searchable
+	attr String forumId;
+	attr String topicId;
+	attr String postId;
+	attr String creationDate;
+	attr String creator;
+	attr String contentClass;
+	attr String requestReplyPrediction;
+}
