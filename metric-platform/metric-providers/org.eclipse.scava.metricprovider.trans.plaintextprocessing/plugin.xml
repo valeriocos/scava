@@ -12,5 +12,4 @@
          <class name="org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.BugTrackerCommentPlainTextProcessing"/>
          <class name="org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.NewsgroupArticlePlainTextProcessing"/>
    </extension>
-
 </plugin>

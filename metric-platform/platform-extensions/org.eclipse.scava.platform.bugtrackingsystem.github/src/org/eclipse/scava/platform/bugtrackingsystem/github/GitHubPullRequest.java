@@ -35,7 +35,7 @@ public class GitHubPullRequest implements Serializable {
     private int commits;
     private int deletions;
     private int number;
-    
+  
     private Integer milestone;
 
     private GitHubPullRequestMarker base;

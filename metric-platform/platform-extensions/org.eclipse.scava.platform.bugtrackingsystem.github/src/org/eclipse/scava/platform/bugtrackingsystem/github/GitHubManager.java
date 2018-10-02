@@ -454,7 +454,7 @@ public class GitHubManager implements IBugTrackingSystemManager<GitHubBugTracker
 		// sets GitHubTracker Information
 		GitHubBugTracker ghbt = new GitHubBugTracker();
 		// ghbt.setProject(user, login, "dccw2097", repo, owner );
-		ghbt.setProject(user, login, "dccw2097",  "paho.mqtt.java", "eclipse");
+		ghbt.setProject(user, login, "x",  "paho.mqtt.java", "eclipse");
 
 		// creates new instances of...
 		GitHubBugTrackingSystemDelta delta = new GitHubBugTrackingSystemDelta();

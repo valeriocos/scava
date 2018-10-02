@@ -43,6 +43,7 @@ public class GitHubReaderUtils {
 		gitHubIssue.setUpdatedTime(issue);
 		gitHubIssue.setNumComments(issue);
 		gitHubIssue.addLabel(issue);
+		gitHubIssue.setCreator(issue.getUser().toString());
 		//gitHubIssue.setMilestone(issue);
 		gitHubIssue.setBody(issue);
 		gitHubIssue.setAssignee(issue);
@@ -109,8 +110,9 @@ public class GitHubReaderUtils {
 	public static  GitHubPullRequest convertToGitHubPullRequest(PullRequest pullRequest, BugTrackingSystem ghbt, Date day){
 		//TODO will also need to handle pullrequest head
 		GitHubPullRequest gitHubPullRequest = new GitHubPullRequest();
-		
+		gitHubPullRequest.setId(pullRequest);
 		gitHubPullRequest.setMergeable(pullRequest);
+		gitHubPullRequest.setCreatedAt(pullRequest);
 		gitHubPullRequest.setMerged(pullRequest);
 		gitHubPullRequest.setClosedAt(pullRequest);
 		gitHubPullRequest.setMergedAt(pullRequest);
