@@ -1,11 +1,14 @@
 package org.eclipse.scava.metricprovider.historic.index;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.eclipse.scava.metricprovider.trans.bugs.emotions.EmotionsTransMetricProvider;
+
+import org.eclipse.scava.metricprovider.historic.index.model.IndexHistoricMetric;
 import org.eclipse.scava.metricprovider.trans.detectingcode.DetectingCodeTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.detectingcode.model.DetectingCodeTransMetric;
 import org.eclipse.scava.metricprovider.trans.plaintextprocessing.PlainTextProcessingTransMetricProvider;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.BugTrackerCommentPlainTextProcessing;
+import org.eclipse.scava.metricprovider.trans.plaintextprocessing.model.PlainTextProcessingTransMetric;
 import org.eclipse.scava.metricprovider.trans.sentimentclassification.SentimentClassificationTransMetricProvider;
 import org.eclipse.scava.metricprovider.trans.severityclassification.SeverityClassificationTransMetricProvider;
 import org.eclipse.scava.platform.AbstractHistoricalMetricProvider;
@@ -13,7 +16,6 @@ import org.eclipse.scava.platform.IMetricProvider;
 import org.eclipse.scava.platform.MetricProviderContext;
 import org.eclipse.scava.platform.delta.bugtrackingsystem.PlatformBugTrackingSystemManager;
 import org.eclipse.scava.platform.delta.communicationchannel.PlatformCommunicationChannelManager;
-import org.eclipse.scava.repository.model.BugTrackingSystem;
 import org.eclipse.scava.repository.model.CommunicationChannel;
 import org.eclipse.scava.repository.model.Project;
 import org.eclipse.scava.repository.model.cc.nntp.NntpNewsGroup;
@@ -35,9 +37,12 @@ public class IndexHistoricMetricProvider extends AbstractHistoricalMetricProvide
 	protected List<IMetricProvider> uses;
 	
 	@Override
-	public Pongo measure(Project project) {
-
-		return null;
+	public Pongo measure(Project project) throws NullPointerException{
+		System.err.println("Started " + getIdentifier());
+		IndexHistoricMetric indexHistoricMetric = new IndexHistoricMetric();
+		
+			
+		return indexHistoricMetric;
 	}
 
 	@Override
@@ -88,10 +93,10 @@ public class IndexHistoricMetricProvider extends AbstractHistoricalMetricProvide
 		List<String> list = new ArrayList<String>();
 		
 		list.add(PlainTextProcessingTransMetricProvider.class.getCanonicalName());//plain text
-		//list.add(SeverityClassificationTransMetricProvider.class.getCanonicalName());//severity
-		//list.add(SentimentClassificationTransMetricProvider.class.getCanonicalName());//sentiment
+		list.add(SeverityClassificationTransMetricProvider.class.getCanonicalName());//severity
+		list.add(SentimentClassificationTransMetricProvider.class.getCanonicalName());//sentiment
 		list.add(DetectingCodeTransMetricProvider.class.getCanonicalName());//code detect
-		//list.add()
+		//ADD MORE HERE
 		
 	return list;
 	}
@@ -102,5 +107,16 @@ public class IndexHistoricMetricProvider extends AbstractHistoricalMetricProvide
 		this.communicationChannelManager = context.getPlatformCommunicationChannelManager();
 		this.context = context;
 	}
+	
+	
+	
+	private void clearDB(DetectingCodeTransMetric db) {
+		db.getBugTrackerComments().getDbCollection().drop();
+		db.getNewsgroupArticles().getDbCollection().drop();
+		db.sync();
+	}
+	
+
+	
 
 }

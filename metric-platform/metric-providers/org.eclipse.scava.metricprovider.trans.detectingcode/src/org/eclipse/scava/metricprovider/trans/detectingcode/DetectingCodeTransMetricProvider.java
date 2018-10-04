@@ -97,7 +97,10 @@ public class DetectingCodeTransMetricProvider implements ITransientMetricProvide
 		
 		for (BugTrackerCommentPlainTextProcessing comment : commentsIt)
 		{
+			System.out.println(comment.getPlainText());
+			
 			BugTrackerCommentDetectingCode commentDataInDC = findBugTrackerComment(db, comment);
+			
 			if(commentDataInDC == null)
 			{
 				commentDataInDC = new BugTrackerCommentDetectingCode();

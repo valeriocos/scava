@@ -16,6 +16,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
+
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ElasticSearchManager {
 
 	public ElasticSearchManager() {
+		
 		this.hostname = loadPropertiesFile().get("hostname").toString();// hostname 
 		this.port = Integer.valueOf(loadPropertiesFile().getProperty("port").toString());
 		this.scheme = loadPropertiesFile().getProperty("scheme").toString();
@@ -73,7 +75,6 @@ public class ElasticSearchManager {
 		if (!Files.exists(path)) {
 			System.err.println("The file " + path + " has not been found");
 		}
-
 	}
 
 	private String getProperties() throws IllegalArgumentException, IOException {
@@ -86,22 +87,21 @@ public class ElasticSearchManager {
 		return file.getPath();
 	}
 
-	private List<String> getIndices() {
-
+	public List<String> getIndices() {
 		List<String> list = new ArrayList<String>();
-
 		ImmutableOpenMap<String, IndexMetaData> indices = this.adminClient.admin().cluster().prepareState().get()
 				.getState().getMetaData().getIndices();
 		for (ObjectObjectCursor<String, IndexMetaData> x : indices) {
 			if (!(x.value == null)) {
 				if (!(x.value.getIndex().getName().startsWith("."))) {
-					list.add(x.value.getIndex().getName());
+					if (!(list.contains(x.value.getIndex().getName()))) {
+						System.out.println(x.value.getIndex().getName());
+						list.add(x.value.getIndex().getName());
+					}
 				}
 			}
 		}
-
 		return list;
-
 	}
 
 	private Client getAdminClient() {
