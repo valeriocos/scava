@@ -39,8 +39,6 @@ public class CommuincationChannelForumPost implements Serializable {
 		PostId = postId;
 	}
 	
-	
-	
 	public String getForumId() {
 		return forumId;
 	}

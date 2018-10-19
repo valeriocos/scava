@@ -14,13 +14,13 @@ public class EclipseForum extends org.eclipse.scava.repository.model.Communicati
 		super();
 		super.setSuperTypes("org.eclipse.scava.repository.model.cc.eclipseforums.CommunicationChannel");
 		OPEN_ID.setOwningType("org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum");
-		TOPIC_ID.setOwningType("org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum");
+		FORUM_ID.setOwningType("org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum");
 		SUBJECT.setOwningType("org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum");
 		DESCRIPTION.setOwningType("org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum");
 	}
 	
 	public static StringQueryProducer OPEN_ID = new StringQueryProducer("open_id"); 
-	public static StringQueryProducer TOPIC_ID = new StringQueryProducer("topic_id"); 
+	public static StringQueryProducer FORUM_ID = new StringQueryProducer("forum_id"); 
 	public static StringQueryProducer SUBJECT = new StringQueryProducer("subject"); 
 	public static StringQueryProducer DESCRIPTION = new StringQueryProducer("description"); 
 	
@@ -34,12 +34,12 @@ public class EclipseForum extends org.eclipse.scava.repository.model.Communicati
 		notifyChanged();
 		return this;
 	}
-	public String getTopic_id() {
-		return parseString(dbObject.get("topic_id")+"", "");
+	public String getForum_id() {
+		return parseString(dbObject.get("forum_id")+"", "");
 	}
 	
-	public EclipseForum setTopic_id(String topic_id) {
-		dbObject.put("topic_id", topic_id);
+	public EclipseForum setForum_id(String forum_id) {
+		dbObject.put("forum_id", forum_id);
 		notifyChanged();
 		return this;
 	}

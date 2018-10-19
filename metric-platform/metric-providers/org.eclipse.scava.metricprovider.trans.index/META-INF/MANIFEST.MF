@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Index
-Bundle-SymbolicName: org.eclipse.scava.metricprovider.trans.index;singleton:=true
+Bundle-SymbolicName: org.eclipse.scava.metricprovider.trans.bugs.index;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Export-Package: org.eclipse.scava.metricprovider.trans.index.document
-Bundle-Activator: org.eclipse.scava.metricprovider.trans.index.Activator
+Export-Package: org.eclipse.scava.metricprovider.trans.bugs.index.document
+Bundle-Activator: org.eclipse.scava.metricprovider.trans.bugs.index.Activator
 Require-Bundle: org.eclipse.osgi,
  org.eclipse.scava.index.indexer,
  org.eclipse.scava.elasticsearch.dependencies,
@@ -14,5 +14,14 @@ Require-Bundle: org.eclipse.osgi,
  org.eclipse.scava.repository.model,
  org.eclipse.scava.repository.model.cc.nntp,
  org.eclipse.scava.repository.model.sourceforge,
- org.eclipse.scava.metricprovider.trans.plaintextprocessing
+ org.eclipse.scava.metricprovider.trans.plaintextprocessing,
+ org.eclipse.scava.platform.bugtrackingsystem.github,
+ org.eclipse.scava.metricprovider.trans.severityclassification,
+ org.eclipse.scava.repository.model.github,
+ org.eclipse.scava.metricprovider.trans.detectingcode,
+ org.eclipse.scava.platform.bugtrackingsystem.mantis,
+ org.eclipse.scava.repository.model.mantis,
+ org.eclipse.scava.platform.bugtrackingsystem.redmine,
+ org.eclipse.scava.platform.bugtrackingsystem.bitbucket,
+ org.eclipse.scava.platform.bugtrackingsystem.jira
 Bundle-ActivationPolicy: lazy

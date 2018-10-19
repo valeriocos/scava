@@ -26,9 +26,7 @@ public class GitHubPullRequest implements Serializable {
     private Date mergedAt;
     private Date updatedAt;
     private Date createdAt;
-    
-    private long id;
-    
+ 
     private int additions;
     private int changedFiles;
     private int comments;
@@ -37,10 +35,11 @@ public class GitHubPullRequest implements Serializable {
     private int number;
   
     private Integer milestone;
-
+    
     private GitHubPullRequestMarker base;
     private GitHubPullRequestMarker head;
 
+    private String id;
     private String body;
     private String diffUrl;
     private String htmlUrl;
@@ -129,7 +128,7 @@ public class GitHubPullRequest implements Serializable {
     	
     	try{
     		
-    		this.id = pullRequest.getHead().getRepo().getId().longValue();
+    		this.id = Long.toUnsignedString(pullRequest.getHead().getRepo().getId().longValue());
     	}catch(NullPointerException np){
     		
     		
@@ -261,7 +260,7 @@ public class GitHubPullRequest implements Serializable {
         return createdAt;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 

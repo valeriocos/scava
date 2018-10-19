@@ -1,8 +1,10 @@
 package org.eclipse.scava.platform.communicationchannel.eclipseforums;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;//REMOVE only used for testing
+import java.sql.Timestamp;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.scava.platform.Date;
@@ -11,10 +13,12 @@ import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChanne
 import org.eclipse.scava.platform.delta.communicationchannel.CommunicationChannelDelta;
 import org.eclipse.scava.platform.delta.communicationchannel.ICommunicationChannelManager;
 import org.eclipse.scava.platform.communicationchannel.eclipseforums.utils.EclipseForumUtils;
+import org.eclipse.scava.platform.communicationchannel.eclipseforums.utils.EclipseForumsForum;
 import org.eclipse.scava.platform.communicationchannel.eclipseforums.utils.EclipseForumsPost;
 import org.eclipse.scava.repository.model.CommunicationChannel;
 import org.eclipse.scava.repository.model.cc.eclipseforums.EclipseForum;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.DB;
@@ -27,6 +31,7 @@ import okhttp3.Response;
 public class EclipseForumsManager implements ICommunicationChannelManager<EclipseForum> {
 
 	public EclipseForumsManager() {
+		this.topicList = new ArrayList<>();
 		this.postList = new ArrayList<>();
 
 	}
@@ -34,6 +39,8 @@ public class EclipseForumsManager implements ICommunicationChannelManager<Eclips
 	private static String host = "https://api.eclipse.org/";
 	private final static String PAGE_SIZE = "100";
 	private List<EclipseForumsPost> postList;
+	private List<String> topicList;
+	private OkHttpClient client = new OkHttpClient();
 
 	// IMPLEMENTED METHODS START
 	@Override
@@ -46,68 +53,82 @@ public class EclipseForumsManager implements ICommunicationChannelManager<Eclips
 
 		System.out.println("Getting First Date");
 		
-		OkHttpClient client = new OkHttpClient();
+		//MODIFY TO GET FOURM INFORMATION AND THEN GET ALL TOPICS
 
-		HttpUrl.Builder urlBuilder = HttpUrl.parse(host).newBuilder();
-		urlBuilder.addEncodedPathSegment("forums");
-		urlBuilder.addEncodedPathSegment("post");
-		urlBuilder.addEncodedQueryParameter("topic_id", eclipseForum.getTopic_id());
-		urlBuilder.addEncodedQueryParameter("order_by", "DESC");
-		urlBuilder.addEncodedQueryParameter("pagesize", PAGE_SIZE);
+		HttpUrl.Builder categoryBuilder = HttpUrl.parse(host).newBuilder();
+		categoryBuilder.addEncodedPathSegment("forums");
+		categoryBuilder.addEncodedPathSegment("forum");
+		categoryBuilder.addPathSegment(eclipseForum.getForum_id());
+		
+		// urlBuilder.addEncodedQueryParameter("forum_id", eclipseForum.getForum_id());
+		// urlBuilder.addEncodedQueryParameter("order_by", "DESC");
+		// urlBuilder.addEncodedQueryParameter("pagesize", PAGE_SIZE);
 
-		String requestUrl = urlBuilder.build().toString();
-
-		Request request = new Request.Builder().url(requestUrl).build();
-
-		Response response = client.newCall(request).execute();
-
-		final JsonNode arrNode = new ObjectMapper().readTree(response.body().string()).get("result");
-
-		response.close();
-
-		if (arrNode.isArray()) {
-			for (JsonNode objNode : arrNode) {
-
-				EclipseForumsPost post = new EclipseForumsPost();
-				
-				post.setCommunicationChannel(eclipseForum);
-				post.setPostId(EclipseForumUtils.fixString(objNode.findValue("id").toString()));
-				post.setSubject(EclipseForumUtils.fixString(objNode.findValue("subject").toString()));
-				post.setForumId(EclipseForumUtils.fixString(objNode.findValue("topic_id").toString()));
-				post.setUser(EclipseForumUtils.fixString(objNode.findValue("poster_id").toString()));
-				post.setDate(EclipseForumUtils.convertStringToDate(objNode.findValue("created_date").toString()).toJavaDate());
-				post.setText(EclipseForumUtils.fixString(objNode.findValue("body").toString()));
-				post.setHtmlUrl(EclipseForumUtils.fixString(objNode.findValue("html_url").toString()));
-				post.setTopicUrl(EclipseForumUtils.fixString(objNode.findValue("topic_url").toString()));
-				post.setForumUrl(EclipseForumUtils.fixString(objNode.findValue("forum_url").toString()));
-				post.setUser(EclipseForumUtils.fixString(objNode.findValue("user_url").toString()));
-
-				postList.add(post);
+		String requestCategoryUrl = categoryBuilder.build().toString();
+		Request categoryRequest = new Request.Builder().url(requestCategoryUrl).build();
+		Response categoryResponse = client.newCall(categoryRequest).execute();
+		JsonNode jsonNode = new ObjectMapper().readTree(categoryResponse.body().string());
+		Date firstPostDate = EclipseForumUtils.convertStringToDate((jsonNode.findValue("created_date").toString()));
+		categoryResponse.close();
+		
+		HttpUrl.Builder forumBuilder = HttpUrl.parse(host).newBuilder();
+		forumBuilder.addEncodedPathSegment("forums");
+		forumBuilder.addEncodedPathSegment("topic");
+		forumBuilder.addQueryParameter("forum_id", eclipseForum.getForum_id());
+		forumBuilder.addQueryParameter("pagesize", PAGE_SIZE);
+		
+		String requestForumUrl = forumBuilder.build().toString();
+	
+		Request forumRequest = new Request.Builder().url(requestForumUrl).build();
+		Response forumResponse = client.newCall(forumRequest).execute();
+		
+		jsonNode = new ObjectMapper().readTree(forumResponse.body().string()).get("result");;
+		forumResponse.close();
+		
+		if (jsonNode.isArray()) {
+			for (JsonNode node : jsonNode) {		
+				topicList.add(node.findValue("id").toString().replaceAll("\"", ""));
 			}
 		}
-		
-		Date firstPostDate = new Date(postList.get(postList.size() - 1).getDate());
-		
-		
-		//firstPostDate = Date d = new Date().parseDate(x);
-				
-		// TODO remove print out and pause
-		System.err.println("FORUM SUBJECT   : " + postList.get(0).getSubject());
-		System.err.println("FIRST DATE      : " + firstPostDate);
-		System.err.println("NUMBER OF POSTS : " + postList.size());
-		TimeUnit.MILLISECONDS.sleep(5);
-
+	
 		return firstPostDate;
 	}
 
 	@Override
-	public CommunicationChannelDelta getDelta(DB db, EclipseForum forum, Date date) {
+	public CommunicationChannelDelta getDelta(DB db, EclipseForum forum, Date date) throws Exception{
 
-		System.err.println("get delta is starting");
+		String since = Long.toString((date.toJavaDate().getTime()) /1000l);
+		String until = Long.toString((date.addDays(1).toJavaDate().getTime()-1000) /1000l);
 		
 		CommunicationChannelDelta delta = new CommunicationChannelDelta();
 		delta.setCommunicationChannel(forum);
-
+		
+		for (String topic_id : topicList) {
+			
+			HttpUrl.Builder forumBuilder = HttpUrl.parse(host).newBuilder();
+			forumBuilder.addEncodedPathSegment("forums");
+			forumBuilder.addEncodedPathSegment("post");
+			forumBuilder.addQueryParameter("topic_id", topic_id);
+			forumBuilder.addQueryParameter("since", since);
+			forumBuilder.addQueryParameter("until", until);
+			forumBuilder.addQueryParameter("pagesize", PAGE_SIZE);
+			
+			String requestUrl = forumBuilder.build().toString();
+			Request request = new Request.Builder().url(requestUrl).build();
+			Response response = client.newCall(request).execute();
+			JsonNode  jsonNode = new ObjectMapper().readTree(response.body().string());
+			
+			if (!jsonNode.isNull()) {
+				if(jsonNode.isArray()) {
+					for(JsonNode node : jsonNode) {
+						
+						System.out.println(node.findValue("body"));
+					
+					}		
+				}
+			}
+		}
+		
 
 		// OPTIMISATION |
 		// Reads the last element in the list, which are descending order
@@ -117,46 +138,39 @@ public class EclipseForumsManager implements ICommunicationChannelManager<Eclips
 		// Also, if a new creation date is detected return delta, this minimises
 		// the number of iterations through the list.
 
-		try {
-			Boolean flag;
-			do {
-				CommuincationChannelForumPost post = new CommuincationChannelForumPost();
-				
-				int i = postList.size() - 1;
-				flag = false;
-				if (DateUtils.isSameDay(postList.get(i).getDate(), date.toJavaDate())) {
-					flag = true;
-					post.setCommunicationChannel(forum);
-					
-
-					post.setPostId(postList.get(i).getPostId());
-					post.setDate(postList.get(i).getDate());
-					post.setForumId((postList.get(i).getForumId()));
-					post.setSubject(postList.get(i).getSubject());
-					post.setText(postList.get(i).getText());
-					post.setUser(postList.get(i).getUser());
-		
-					delta.getPosts().add(post);
-					
-					System.err.println(date.toString() + ": post " + post.getPostId() + " added");
-					postList.remove(i);
-
-				} else {
-
-					return delta;
-
-				}
-
-			} while (flag = true);
-
-		} catch (ArrayIndexOutOfBoundsException e) {
-
-			System.err.println("delta is RETURNING");
-			return delta;
-		}
+//		try {
+//			Boolean flag;
+//			do {
+//				CommuincationChannelForumPost post = new CommuincationChannelForumPost();
+//				
+//				int i = postList.size() - 1;
+//				flag = false;
+//				if (DateUtils.isSameDay(postList.get(i).getDate(), date.toJavaDate())) {
+//					flag = true;
+//					post.setCommunicationChannel(forum);
+//					post.setPostId(postList.get(i).getPostId());
+//					post.setDate(postList.get(i).getDate());
+//					post.setForumId((postList.get(i).getForumId()));
+//					post.setSubject(postList.get(i).getSubject());
+//					post.setText(postList.get(i).getText());
+//					post.setUser(postList.get(i).getUser());
+//					delta.getPosts().add(post);
+//					System.err.println(date.toString() + ": post " + post.getPostId() + " added");
+//					postList.remove(i);
+//
+//				} else {
+//					return delta;
+//				}
+//
+//			} while (flag = true);
+//
+//		} catch (ArrayIndexOutOfBoundsException e) {
+//			System.err.println("delta is RETURNING");
+//			return delta;
+//		}
 
 		// This should never be reached.
-		return null;
+		return delta;
 	}
 
 	@Override
@@ -175,7 +189,7 @@ public class EclipseForumsManager implements ICommunicationChannelManager<Eclips
 		EclipseForum ef = new EclipseForum();
 
 		// EXAMPLE FORUMS
-		ef.setTopic_id("1092788"); // Can't run java program in Eclipse - javaw error
+		ef.setForum_id("305"); // Can't run java program in Eclipse - javaw error
 		// ef.setTopic_id("799069");// Eclipse Won't Start
 
 		EclipseForumsManager efc = new EclipseForumsManager();
@@ -186,8 +200,8 @@ public class EclipseForumsManager implements ICommunicationChannelManager<Eclips
 		do {
 			System.out.println("\nDate : " + date + "----------------------------------");
 			CommunicationChannelDelta delta = new CommunicationChannelDelta();
-			delta = 	efc.getDelta(null, ef, date);
-			System.out.println("\t" + delta.getPosts().size()); 
+			delta = efc.getDelta(null, ef, date);
+			//System.out.println("\t" + delta.getPosts().size()); 
 			date = new Date(date.addDays(1).toString());
 		} while (date.compareTo(today) < 1);
 

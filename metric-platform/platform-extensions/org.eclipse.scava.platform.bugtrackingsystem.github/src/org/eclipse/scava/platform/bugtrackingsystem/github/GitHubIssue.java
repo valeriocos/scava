@@ -129,7 +129,7 @@ public class GitHubIssue extends BugTrackingSystemBug {
 		return closedTime;
 	}
 
-	public Date getUpdatedTime(String Date) {
+	public Date getUpdatedTime() {
 
 		return updatedTime;
 	}
