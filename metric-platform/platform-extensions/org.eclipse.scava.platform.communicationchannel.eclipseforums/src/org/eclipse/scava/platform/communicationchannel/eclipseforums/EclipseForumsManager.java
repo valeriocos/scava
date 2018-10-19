@@ -54,6 +54,7 @@ public class EclipseForumsManager implements ICommunicationChannelManager<Eclips
 		System.out.println("Getting First Date");
 		
 		//MODIFY TO GET FOURM INFORMATION AND THEN GET ALL TOPICS
+		//	-get topic ID first post date and last postdate store in list this is  used to created temporal filters
 
 		HttpUrl.Builder categoryBuilder = HttpUrl.parse(host).newBuilder();
 		categoryBuilder.addEncodedPathSegment("forums");
