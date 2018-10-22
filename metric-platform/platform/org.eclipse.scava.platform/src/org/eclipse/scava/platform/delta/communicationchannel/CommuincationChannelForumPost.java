@@ -16,13 +16,7 @@ public class CommuincationChannelForumPost implements Serializable {
 	private Date date;
 	private String PostId;
 	transient private CommunicationChannel communicationChannel;// need to modify
-	
-	
-	
 
-	
-	
-	
 	public CommunicationChannel getCommunicationChannel() {
 		return communicationChannel;
 	}

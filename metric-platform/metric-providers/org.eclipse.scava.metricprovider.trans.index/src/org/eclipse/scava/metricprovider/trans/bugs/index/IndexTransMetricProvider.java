@@ -40,11 +40,7 @@ import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemComme
 import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemDelta;
 import org.eclipse.scava.platform.delta.bugtrackingsystem.BugTrackingSystemProjectDelta;
 import org.eclipse.scava.platform.delta.bugtrackingsystem.PlatformBugTrackingSystemManager;
-import org.eclipse.scava.platform.delta.communicationchannel.PlatformCommunicationChannelManager;
-import org.eclipse.scava.repository.model.CommunicationChannel;
 import org.eclipse.scava.repository.model.Project;
-import org.eclipse.scava.repository.model.cc.nntp.NntpNewsGroup;
-import org.eclipse.scava.repository.model.sourceforge.Discussion;
 import org.eclipse.scava.index.indexer.Indexer;
 
 import com.mongodb.DB;
@@ -53,13 +49,13 @@ import com.mongodb.DB;
  * This class is responsible for preparing data contained within the bug tracking system deltas in a format that is accepted by the IndexerTool 
  * 
  * TODO - Enable NL Fields once models/classifiers are complete
+ * TODO - Add Mappings
  * 
  * @author Dan Campbell
  */
 public class IndexTransMetricProvider implements ITransientMetricProvider<IndexTransMetric> {
 
 	protected PlatformBugTrackingSystemManager platformBugTrackingSystemManager;
-	protected PlatformCommunicationChannelManager communicationChannelManager;
 	protected List<IMetricProvider> uses;
 	protected MetricProviderContext context;
 
@@ -70,28 +66,23 @@ public class IndexTransMetricProvider implements ITransientMetricProvider<IndexT
 
 	@Override
 	public String getShortIdentifier() {
-		return "indexer";
+		return "BugIndexer";
 	}
 
 	@Override
 	public String getFriendlyName() {
-		return "Indexer";
+		return "BugTrackerIndexer";
 	}
 
 	@Override
 	public String getSummaryInformation() {
 
-		return "This metric is responsible for preparing documents for the Indexer tool";
+		return "This metric is responsible for preparing bugtracking system documents for the Indexer tool";
 	}
 
 	@Override
 	public boolean appliesTo(Project project) {
-		for (CommunicationChannel communicationChannel : project.getCommunicationChannels()) {
-			if (communicationChannel instanceof NntpNewsGroup)
-				return true;
-			if (communicationChannel instanceof Discussion)
-				return true;
-		}
+	
 		return !project.getBugTrackingSystems().isEmpty();
 	}
 
@@ -498,7 +489,6 @@ public class IndexTransMetricProvider implements ITransientMetricProvider<IndexT
 		try {
 			file = new File(locateMappings(indexName));
 		} catch (IllegalArgumentException | IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} 
 		try {
@@ -507,11 +497,10 @@ public class IndexTransMetricProvider implements ITransientMetricProvider<IndexT
 			while ((line = br.readLine()) != null) {
 				indexmapping = indexmapping + line;
 			  } 
+			br.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

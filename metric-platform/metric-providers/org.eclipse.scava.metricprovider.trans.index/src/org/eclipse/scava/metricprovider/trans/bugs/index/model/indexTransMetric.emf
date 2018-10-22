@@ -1,4 +1,4 @@
-package org.eclipse.scava.metricprovider.trans.index.model;
+package org.eclipse.scava.metricprovider.trans.bugs.index.model;
 
 @db(qualifiedCollectionNames="true")
 @customize

@@ -38,11 +38,9 @@ public class Indexer {
 	private static Client adminClient;
 
 	static {
-		
 		IndexerSingleton singleton = IndexerSingleton.getInstance();
 		highLevelClient = singleton.getHighLevelclient();
 		adminClient = singleton.getAdminClient();
-
 	}
 
 	/**
@@ -101,15 +99,11 @@ public class Indexer {
 			if (createIndexResponse.isAcknowledged() == true) {
 				System.err.println("\t -Index " + indexName + " has been created");
 			}
-
 		} catch (ElasticsearchStatusException e) {
 			System.err.println("\t-" + indexName + "\tIndexResponse :" + e.getLocalizedMessage());
-
 		} catch (IOException e) {
-
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -126,16 +120,13 @@ public class Indexer {
 
 		PutMappingRequest putMappingRequest = new PutMappingRequest(indexName.toLowerCase());
 		putMappingRequest.source(mapping, XContentType.JSON).type(documentType.toLowerCase());
-
 		PutMappingResponse putMappingResponse;
 		try {
 			putMappingResponse = highLevelClient.indices().putMapping(putMappingRequest, getWriteHeaders());
-
 			if (putMappingResponse.isAcknowledged() == true) {
 				System.out.println(
 						"[ELASTICSEARCH MANAGER] \tMapping for " + documentType + " in " + indexName + " was added");
 			}
-
 		} catch (IOException e) {
 			//Do Nothing
 		}
@@ -177,10 +168,9 @@ public class Indexer {
 	 */
 	@SuppressWarnings("unused")
 	public static GetRequest prepareGetRequest(String index, String doc, String doc_id) {
-
+		
 		GetRequest request = new GetRequest(index, doc, doc_id);
-
-		return request;
+		return null;
 	}
 
 	/**
@@ -229,7 +219,6 @@ public class Indexer {
 
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		searchSourceBuilder.query(queryBuilder);
-
 		// search request
 		SearchRequest searchRequest = new SearchRequest(index);
 		searchRequest.source(searchSourceBuilder).types(type);
@@ -246,7 +235,6 @@ public class Indexer {
 
 		highLevelClient.close();
 		System.out.println("[ELASTICSEARCH MANAGER] \tHight Level Client - Closed");
-
 	}
 
 	/**
@@ -283,7 +271,6 @@ public class Indexer {
 
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonString = mapper.writeValueAsString(object);
-
 		return jsonString;
 	}
 
@@ -292,10 +279,10 @@ public class Indexer {
 	 * to an index and index or update a document related to bug tracking systems.
 	 * 
 	 * @param indexName
-	 * @param bugTrackerType
+	 * @param type
 	 * @param document
 	 */
-	public static void performIndexing(String indexName, String mapping, String bugTrackerType, String documentType, String uid,
+	public static void performIndexing(String indexName, String mapping, String type, String documentType, String uid,
 			Object document) {
 		
 		System.err.println("[Performing Indexing] -----------------------------------------------------------");
@@ -318,7 +305,6 @@ public class Indexer {
 			}
 		}
 	}
-	
 
 	// ------------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------------
@@ -350,128 +336,7 @@ public class Indexer {
 				System.out.println("[ELASTICSEARCH MANAGER] \tIndex: " + index + "has been deleted");
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
 }
-
-// ------------------------------------------------------------------------------------------
-	// ------------------------------------------------------------------------------------------
-	
-		// OLD CODE - to afraid to delete :)
-	
-	// ------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------
-
-// public Indexer() {
-//
-// this.hostname = loadPropertiesFile().get("hostname").toString();// hostname
-// this.port =
-// Integer.valueOf(loadPropertiesFile().getProperty("port").toString());
-// this.scheme = loadPropertiesFile().getProperty("scheme").toString();
-// this.clusterName =
-// loadPropertiesFile().getProperty("cluster-name").toString(); // name given to
-// the cluster
-// this.clusterport =
-// Integer.valueOf(loadPropertiesFile().getProperty("cluster-port").toString());
-// //this is a different value to the 'port' check cluster settings
-// this.highLevelclient = getHighLevelClient(); // This client handles 'High
-// Level requests' such as indexing docs
-// this.adminClient = getAdminClient(); // this client is used to perform
-// administration tasks on ES
-// this.indices = getIndices();
-// }
-//
-// private Properties indexProperties = new Properties();
-// private String hostname;
-// private String scheme;
-// private int port;
-// private int clusterport;
-// private String clusterName;
-// private RestHighLevelClient highLevelclient;
-// private Client adminClient;
-// private List<String> indices = new ArrayList<String>();
-//
-// private void checkPropertiesFile(Path path) {
-// if (!Files.exists(path)) {
-// System.err.println("The file " + path + " has not been found");
-// }
-// }
-
-// private String getProperties() throws IllegalArgumentException, IOException {
-// String path =
-// getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-// if (path.endsWith("bin/"))
-// path = path.substring(0, path.lastIndexOf("bin/"));
-// File file = new File(path + "prefs/elasticsearch.properties");
-// checkPropertiesFile(file.toPath());
-//
-// return file.getPath();
-// }
-
-/// **
-// * Reads Elasticsearch configuration properties from properties file
-// *
-// * @return indexProperties
-// */
-// private Properties loadPropertiesFile() {
-// InputStream iStream = null;
-// try {
-// // Loading properties file from the path (relative path given here)
-// iStream = new FileInputStream(getProperties());
-// indexProperties.load(iStream);
-//
-// } catch (IOException e) {
-//
-// e.printStackTrace();
-// } finally {
-// try {
-// if (iStream != null) {
-// iStream.close();
-// return indexProperties;
-// }
-// } catch (IOException e) {
-//
-// e.printStackTrace();
-// }
-// }
-// return indexProperties;
-// }
-
-/// **
-// *
-// * Builds an Elasticsearch HighLevel REST client
-// *
-// * @return RestHighLevelClient
-// */
-// private RestHighLevelClient getHighLevelClient() {
-//
-// RestHighLevelClient client = new RestHighLevelClient(
-// RestClient.builder(new HttpHost(this.hostname, this.port, this.scheme),
-// new HttpHost(this.hostname, this.port + 1, this.scheme)));
-//
-// System.out.println("[ELASTICSEARCH MANAGER] \tHighLevelClient for " +
-/// hostname + " has been created");
-// return client;
-// }
-// private Client getAdminClient() {
-//
-// Client client = null;
-//
-// Settings settings = Settings.builder().put("client.transport.sniff",
-/// true).put("cluster.name", this.clusterName)
-// .build();
-//
-// try {
-// client = new PreBuiltTransportClient(settings)
-// .addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"),
-/// clusterport));
-// } catch (UnknownHostException e) {
-// e.printStackTrace();
-// }
-// System.out.println("[ELASTICSEARCH MANAGER] \tAdmin Client Created");
-//
-// return client;
-// }

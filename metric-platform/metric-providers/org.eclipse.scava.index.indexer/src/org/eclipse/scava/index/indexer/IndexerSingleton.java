@@ -47,7 +47,6 @@ public class IndexerSingleton {
 			highLevelclient = createHighLevelClient(); // This client handles 'High Level requests' such as indexing docs
 			adminClient = createAdminClient(); // this client is used to perform administration tasks on ES
 			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
