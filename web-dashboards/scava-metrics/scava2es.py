@@ -28,7 +28,6 @@ import argparse
 import hashlib
 import json
 import logging
-import random
 import statistics
 
 from perceval.backends.scava.scava import (Scava,
@@ -44,17 +43,8 @@ from grimoire_elk.elastic import ElasticSearch
 from grimoire_elk.elastic_mapping import Mapping as BaseMapping
 
 
-UUIDS = {}
-DUPLICATED_UUIDS = 0
 META_MARKER = '--meta'
 DEFAULT_TOP_PROJECT = 'main'
-
-# FAKE DATA: create fake unique UUIDs in order to maximize the amount of data to create dashboards
-# This is related to https://github.com/crossminer/scava/issues/139 and https://github.com/crossminer/scava/issues/138
-GLOBAL_METRIC_COUNTER = 0
-GLOBAL_FACTOID_COUNTER = 0
-MIN_VALUE = 1
-MAX_VALUE = 100
 
 
 class Mapping(BaseMapping):
@@ -126,13 +116,6 @@ def uuid(*args):
 
     sha1 = hashlib.sha1(s.encode('utf-8', errors='surrogateescape'))
     uuid_sha1 = sha1.hexdigest()
-
-    if uuid_sha1 not in UUIDS:
-        UUIDS[uuid_sha1] = args
-    else:
-        logging.debug("Detected scava item value %s" % str(args))
-        global DUPLICATED_UUIDS
-        DUPLICATED_UUIDS += 1
 
     return uuid_sha1
 
@@ -305,25 +288,7 @@ def extract_metrics(scava_metric):
     mdata = scava_metric['data']
     mupdated = mdata['updated']
 
-    # FAKE DATA: replace empty data with fake one.
-    # This is related to https://github.com/crossminer/scava/issues/139
-    # and https://github.com/crossminer/scava/issues/138
-    if not mdata['datatable']:
-        item_metric = {
-            'project': mdata['project'],
-            'metric_class': mdata['id'].split(".")[0],
-            'metric_type': mdata['type'],
-            'metric_id': mdata['id'],
-            'metric_desc': mdata['description'],
-            'metric_name': mdata['name'],
-            'metric_es_value': random.randint(MIN_VALUE, MAX_VALUE),
-            'metric_es_compute': 'FAKE',
-            'datetime': mupdated,
-            'scava': mdata
-        }
-        item_metrics.append(item_metric)
-
-    elif mdata['type'] == 'BarChart':
+    if mdata['type'] == 'BarChart':
         for item_metric in create_item_metrics_from_barchart(mdata, mupdated):
             item_metrics.append(item_metric)
     elif mdata['type'] == 'LineChart' and 'series' not in mdata:
@@ -352,35 +317,21 @@ def enrich_metrics(scava_metrics, meta_info=None):
     enriched_error = 0
     enriched_zero = 0
 
-    # FAKE DATA: avoid duplicates maximize the amount of data to create dashboards.
-    # This is related to https://github.com/crossminer/scava/issues/139
-    # and https://github.com/crossminer/scava/issues/138
-    global GLOBAL_METRIC_COUNTER
-
     for scava_metric in scava_metrics:
 
         processed += 1
 
-        # FAKE DATA: replace empty data maximize the amount of data to create dashboards.
-        # This is related to https://github.com/crossminer/scava/issues/139
-        # and https://github.com/crossminer/scava/issues/138
         if not scava_metric['data']['datatable']:
             empty += 1
-            logging.debug("Faking datable for item %s", scava_metric)
-            # logging.debug("Skipping item due to missing datable for item %s", scava_metric)
-            # continue
+            logging.debug("Missing datable for item %s, skipping it", scava_metric)
+            continue
 
         enriched_items = extract_metrics(scava_metric)
         for eitem in enriched_items:
             enriched += 1
 
             eitem['datetime'] = str_to_datetime(eitem['datetime']).isoformat()
-
-            # FAKE DATA: avoid duplicates maximize the amount of data to create dashboards.
-            # This is related to https://github.com/crossminer/scava/issues/139
-            # and https://github.com/crossminer/scava/issues/138
-            eitem['uuid'] = uuid(eitem['metric_id'], eitem['project'], eitem['datetime'], str(GLOBAL_METRIC_COUNTER))
-            GLOBAL_METRIC_COUNTER += 1
+            eitem['uuid'] = uuid(eitem['metric_id'], eitem['project'], eitem['datetime'])
 
             if isinstance(eitem['metric_es_value'], str):
                 enriched_error += 1
@@ -390,29 +341,18 @@ def enrich_metrics(scava_metrics, meta_info=None):
             eitem['metric_es_value'] = float(eitem['metric_es_value'])
             if eitem['metric_es_value'] == 0:
                 enriched_zero += 1
-                # FAKE DATA: replace empty data maximize the amount of data to create dashboards.
-                # This is related to https://github.com/crossminer/scava/issues/139
-                # and https://github.com/crossminer/scava/issues/138
-                eitem['metric_es_value'] = float(random.randint(MIN_VALUE, MAX_VALUE))
-                logging.debug("Faking Metric_es_value is 0 for %s", eitem)
-                # logging.debug("Metric_es_value is 0 for %s", eitem)
+                logging.debug("Metric_es_value is 0 for %s", eitem)
 
             if meta_info:
                 eitem['meta'] = meta_info
 
             yield eitem
 
-    logging.debug("Metric enrichment summary (metrics in input) - processed: %s, empty: %s, duplicated: %s",
-                  processed, empty, DUPLICATED_UUIDS)
+    logging.debug("Metric enrichment summary (metrics in input) - processed: %s, empty: %s", processed, empty)
 
     logging.debug("Metric enrichment summary (enriched metrics in output) - "
                   "total: %s, enriched: %s, failed: %s, zero: %s",
                   enriched + enriched_error, enriched, enriched_error, enriched_zero)
-
-    # FAKE DATA: avoid duplicates maximize the amount of data to create dashboards.
-    # This is related to https://github.com/crossminer/scava/issues/139
-    # and https://github.com/crossminer/scava/issues/138
-    GLOBAL_METRIC_COUNTER = 0
 
 
 def enrich_factoids(scava_factoids, meta_info=None):
@@ -423,10 +363,6 @@ def enrich_factoids(scava_factoids, meta_info=None):
     :param meta_info: meta project information retrieved from the project description
     """
     processed = 0
-    # FAKE DATA: avoid duplicates maximize the amount of data to create dashboards.
-    # This is related to https://github.com/crossminer/scava/issues/139
-    # and https://github.com/crossminer/scava/issues/138
-    global GLOBAL_FACTOID_COUNTER
 
     for scava_factoid in scava_factoids:
         processed += 1
@@ -434,13 +370,7 @@ def enrich_factoids(scava_factoids, meta_info=None):
         factoid_data = scava_factoid['data']
         eitem = factoid_data
         eitem['datetime'] = str_to_datetime(factoid_data['updated']).isoformat()
-        # FAKE DATA: avoid duplicates maximize the amount of data to create dashboards.
-        # This is related to https://github.com/crossminer/scava/issues/139
-        # and https://github.com/crossminer/scava/issues/138
-        eitem['uuid'] = uuid(factoid_data['id'], factoid_data['project'], factoid_data['updated'],
-                             str(GLOBAL_FACTOID_COUNTER))
-
-        GLOBAL_FACTOID_COUNTER += 1
+        eitem['uuid'] = uuid(factoid_data['id'], factoid_data['project'], factoid_data['updated'])
 
         if 'stars' in factoid_data:
             stars_id = 'stars_' + factoid_data['stars']
@@ -460,11 +390,7 @@ def enrich_factoids(scava_factoids, meta_info=None):
 
         yield eitem
 
-    logging.debug("Factoid enrichment summary - processed/enriched: %s, duplicated: %s", processed, DUPLICATED_UUIDS)
-    # FAKE DATA: avoid duplicates maximize the amount of data to create dashboards.
-    # This is related to https://github.com/crossminer/scava/issues/139
-    # and https://github.com/crossminer/scava/issues/138
-    GLOBAL_FACTOID_COUNTER = 0
+    logging.debug("Factoid enrichment summary - processed/enriched: %s", processed)
 
 
 def enrich_dependencies(scava_dependencies, meta_info=None):
@@ -497,7 +423,7 @@ def enrich_dependencies(scava_dependencies, meta_info=None):
 
         yield eitem
 
-    logging.debug("Dependency enrichment summary - processed/enriched: %s, duplicated: %s", processed, DUPLICATED_UUIDS)
+    logging.debug("Dependency enrichment summary - processed/enriched: %s", processed)
 
 
 def extract_meta(project_name, description=None):
@@ -546,8 +472,6 @@ def fetch_scava(url_api_rest, project=None, category=CATEGORY_METRIC):
     if not project:
         # Get the list of projects and get the metrics for all of them
         for project_scava in scava.fetch():
-            global DUPLICATED_UUIDS
-            DUPLICATED_UUIDS = 0
 
             project_shortname = project_scava['data']['shortName']
             scavaProject = Scava(url=url_api_rest, project=project_shortname)
