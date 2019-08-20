@@ -25,7 +25,6 @@
 #
 
 import argparse
-import copy
 import hashlib
 import json
 import logging
@@ -157,7 +156,7 @@ def create_item_metrics_from_barchart(mdata, mupdated):
         'metric_es_value': max_values,
         'metric_es_compute': 'sample',
         'datetime': mupdated,
-        'scava_metric_id': mdata['metricId']
+        'scava': mdata
     }
 
     metric_min = {
@@ -170,7 +169,7 @@ def create_item_metrics_from_barchart(mdata, mupdated):
         'metric_es_value': min_values,
         'metric_es_compute': 'sample',
         'datetime': mupdated,
-        'scava_metric_id': mdata['metricId']
+        'scava': mdata
     }
 
     metric_mean = {
@@ -183,7 +182,7 @@ def create_item_metrics_from_barchart(mdata, mupdated):
         'metric_es_value': mean_values,
         'metric_es_compute': 'sample',
         'datetime': mupdated,
-        'scava_metric_id': mdata['metricId']
+        'scava': mdata
     }
 
     metric_median = {
@@ -196,7 +195,7 @@ def create_item_metrics_from_barchart(mdata, mupdated):
         'metric_es_value': median_values,
         'metric_es_compute': 'sample',
         'datetime': mupdated,
-        'scava_metric_id': mdata['metricId']
+        'scava': mdata
     }
 
     return [metric_max, metric_min, metric_mean, metric_median]
@@ -216,7 +215,7 @@ def create_item_metrics_from_linechart(mdata, mupdated):
                 'metric_name': mdata['name'],
                 'metric_es_compute': 'cumulative',
                 'datetime': mupdated,
-                'scava_metric_id': mdata['metricId'],
+                'scava': mdata,
                 'metric_es_value': None
             }
 
@@ -246,7 +245,7 @@ def create_item_metrics_from_linechart(mdata, mupdated):
                     'metric_es_value': sample[y],
                     'metric_es_compute': 'cumulative',
                     'datetime': mupdated,
-                    'scava_metric_id': mdata['metricId']
+                    'scava': mdata
                 }
 
                 if 'Date' in sample:
@@ -274,20 +273,19 @@ def create_item_metrics_from_linechart_series(mdata, mupdated):
                 'metric_es_value': sample[mdata['y']],
                 'metric_es_compute': 'cumulative',
                 'datetime': mupdated,
-                'scava_metric_id': mdata['metricId']
+                'scava': mdata
             }
 
             if 'Date' in sample:
                 metric['metric_es_compute'] = 'sample'
                 metric['datetime'] = sample['Date']
 
-            if mdata['series'] in sample and mdata['series'] not in ['Repository', 'Topics', 'Readability']:
+            if mdata['series'] in sample and mdata['series'] not in ['Repository', 'Topics']:
                 metric['metric_id'] = mdata['id'] + '_' + sample[mdata['series']]
                 metric['metric_desc'] = mdata['description'] + '(' + sample[mdata['series']] + ')',
                 metric['metric_name'] = mdata['name'] + '(' + sample[mdata['series']] + ')'
 
             metrics.append(metric)
-
         else:
             logging.debug("Linechart series metric, Y axis not handled %s", mdata)
 
@@ -321,20 +319,6 @@ def extract_metrics(scava_metric):
         logging.warning("Metric type %s not handled, skipping item %s", mdata['type'], scava_metric)
 
     logging.debug("Metrics found: %s", item_metrics)
-
-    hiding_factor_metrics = [im for im in item_metrics if im['metric_name'] == 'Method Hiding Factor (Java)']
-    hiding_factor_metrics_processed = []
-    for hfm in hiding_factor_metrics:
-        hfm_copied = copy.deepcopy(hfm)
-
-        hfm_copied['metric_id'] = hfm_copied['metric_id'] + '_filtered_gt10'
-        hfm_copied['metric_name'] = hfm_copied['metric_name'] + ' GT 10'
-
-        if hfm_copied['metric_es_value'] > 0.1:
-            hiding_factor_metrics_processed.append(hfm_copied)
-
-    if hiding_factor_metrics_processed:
-        item_metrics.extend(hiding_factor_metrics_processed)
 
     return item_metrics
 
@@ -1012,37 +996,104 @@ def __init_index(elastic_url, index, wait_time):
 
 if __name__ == '__main__':
 
-    ARGS = get_params()
+    ARGS = [
+        {
+            "index": "scava-metrics",
+            "category": "metric",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-topics",
+            "category": "topic",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-factoids",
+            "category": "factoid",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-dev-deps",
+            "category": "dev-dependency",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-conf-deps",
+            "category": "conf-dependency",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-dep-versions",
+            "category": "version-dependency",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-users",
+            "category": "user",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-conf-smells",
+            "category": "conf-smell",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        },
+        {
+            "index": "scava-project-relations",
+            "category": "project-relation",
+            "bulk-size": 300,
+            "es_url": "https://admin:admin@localhost:9200",
+            "oss_app_url": "http://beta.crossminer.org:8182/"
+        }
+    ]
 
-    if ARGS.debug:
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
-        logging.debug("Debug mode activated")
-    else:
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
-    logging.info("Importing items from %s to %s/%s", ARGS.url, ARGS.elastic_url, ARGS.index)
+    for a in ARGS:
+        url = a['oss_app_url']
+        elastic_url = a['es_url']
+        bulk_size = a['bulk-size']
+        index = a['index']
+        category = a['category']
 
-    elastic = __init_index(ARGS.elastic_url, ARGS.index, ARGS.wait_time)
-    elastic.max_items_bulk = min(ARGS.bulk_size, elastic.max_items_bulk)
+        logging.info("Importing items from %s to %s/%s", url, elastic_url, ARGS.index)
 
-    scava_data = fetch_scava(ARGS.url, ARGS.project, ARGS.category, ARGS.recommendation_url)
+        elastic = __init_index(elastic_url, index, 10)
+        elastic.max_items_bulk = min(bulk_size, elastic.max_items_bulk)
 
-    if scava_data:
-        logging.info("Uploading Scava data to Elasticsearch")
+        scava_data = fetch_scava(url, None, category, None)
 
-        counter = 0
-        to_upload = []
-        for item in scava_data:
+        if scava_data:
+            logging.info("Uploading Scava data to Elasticsearch")
 
-            to_upload.append(item)
+            counter = 0
+            to_upload = []
+            for item in scava_data:
 
-            if len(to_upload) == ARGS.bulk_size:
-                elastic.bulk_upload(to_upload, "uuid")
+                to_upload.append(item)
+
+                if len(to_upload) == bulk_size:
+                    elastic.bulk_upload(to_upload, "uuid")
+                    counter += len(to_upload)
+                    # logging.info("Added %s items to %s", counter, ARGS.index)
+                    to_upload = []
+
+            if len(to_upload) > 0:
                 counter += len(to_upload)
+                elastic.bulk_upload(to_upload, "uuid")
                 # logging.info("Added %s items to %s", counter, ARGS.index)
-                to_upload = []
-
-        if len(to_upload) > 0:
-            counter += len(to_upload)
-            elastic.bulk_upload(to_upload, "uuid")
-            # logging.info("Added %s items to %s", counter, ARGS.index)
