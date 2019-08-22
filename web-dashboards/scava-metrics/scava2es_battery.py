@@ -811,9 +811,7 @@ def fetch_scava(url_api_rest, project=None, category=CATEGORY_METRIC, recommenda
 
             project_shortname = project_scava['data']['shortName']
 
-            if project_shortname not in ['grimoirelabperceval', 'grimoirelabkibiter', 'grimoirelabpercevalmozilla',
-                                         'grimoirelabpercevalopnfv', 'grimoirelabpercevalpuppet', 'grimoirelabgraal',
-                                         'grimoirelabsirmordred']:
+            if project_shortname not in ['grimoirelabtutorial']:
                 continue
 
             scavaProject = Scava(url=url_api_rest, project=project_shortname, recommendation_url=recommendation_url)
@@ -996,69 +994,73 @@ def __init_index(elastic_url, index, wait_time):
 
 if __name__ == '__main__':
 
+    LOCALHOST_APP_LOCAL = 'http://localhost:8182'
+    LOCALHOST_APP_REMOTE = 'http://beta.crossminer.org:8182/'
+    LOCALHOST_APP = LOCALHOST_APP_LOCAL
+
     ARGS = [
         {
             "index": "scava-metrics",
             "category": "metric",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-topics",
             "category": "topic",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-factoids",
             "category": "factoid",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-dev-deps",
             "category": "dev-dependency",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-conf-deps",
             "category": "conf-dependency",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-dep-versions",
             "category": "version-dependency",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-users",
             "category": "user",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-conf-smells",
             "category": "conf-smell",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         },
         {
             "index": "scava-project-relations",
             "category": "project-relation",
             "bulk-size": 300,
             "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": "http://beta.crossminer.org:8182/"
+            "oss_app_url": LOCALHOST_APP
         }
     ]
 
