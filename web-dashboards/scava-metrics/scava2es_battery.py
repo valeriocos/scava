@@ -54,8 +54,53 @@ KEYWORD_MAX_SIZE = 30000  # this control allows to avoid max_bytes_length_exceed
 META_MARKER = '--meta'
 DEFAULT_TOP_PROJECT = 'main'
 
-DEFAULT_BULK_SIZE = 100
+DEFAULT_BULK_SIZE = 50
 DEFAULT_WAIT_TIME = 10
+
+ANALYZED_PROJECTS = [
+    'modelingsirius',
+    'modelinggendoc',
+    'modelingsphinx',
+    'technologyapp4mc',
+    'technologymdmbl',
+    'technologyepf',
+    'technologyscout'
+]
+
+# orientdb
+# neo4j
+# puppetelasticsearch
+# augur
+# augursbom
+# prospector
+# wgrisk
+# wgcommon
+# wgvalue
+# wgdiversityinclusion
+# governance
+# wgevolution
+# metrics
+# website
+# whitepaper
+# grimoirelabtutorial
+# grimoirelabelk
+# grimoirelab
+# grimoirelabsigils
+# grimoirelabperceval
+# grimoirelabsirmordred
+# grimoirelabgraal
+# grimoirelabkingarthur
+# grimoirelabpercevalmozilla
+# grimoirelabpercevalopnfv
+# grimoirelabpercevalpuppet
+# grimoirelabsortinghat
+# grimoirelabtoolkit
+# grimoirelabkidash
+# grimoirelabhatstall
+# grimoirelabcereslib
+# grimoirelabmanuscripts
+# grimoirelabbestiary
+# grimoirelabkibiter
 
 
 class Mapping(BaseMapping):
@@ -811,7 +856,7 @@ def fetch_scava(url_api_rest, project=None, category=CATEGORY_METRIC, recommenda
 
             project_shortname = project_scava['data']['shortName']
 
-            if project_shortname not in ['grimoirelabtutorial']:
+            if project_shortname not in ANALYZED_PROJECTS:
                 continue
 
             scavaProject = Scava(url=url_api_rest, project=project_shortname, recommendation_url=recommendation_url)
@@ -995,72 +1040,82 @@ def __init_index(elastic_url, index, wait_time):
 if __name__ == '__main__':
 
     LOCALHOST_APP_LOCAL = 'http://localhost:8182'
-    LOCALHOST_APP_REMOTE = 'http://beta.crossminer.org:8182/'
-    LOCALHOST_APP = LOCALHOST_APP_LOCAL
+    LOCALHOST_APP_REMOTE = 'http://ci4.castalia.camp:8182'
+    APP_URL = LOCALHOST_APP_REMOTE
+    RECOMMENDATION_URL = 'http://ci4.castalia.camp:8080/api'
+    ES_URL = 'https://admin:admin@crossminer.bitergia.net:9200'
+    BULK_SIZE = 100
 
     ARGS = [
         {
             "index": "scava-metrics",
             "category": "metric",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-topics",
             "category": "topic",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-factoids",
             "category": "factoid",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-dev-deps",
             "category": "dev-dependency",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-conf-deps",
             "category": "conf-dependency",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-dep-versions",
             "category": "version-dependency",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-users",
             "category": "user",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-conf-smells",
             "category": "conf-smell",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         },
         {
             "index": "scava-project-relations",
             "category": "project-relation",
-            "bulk-size": 300,
-            "es_url": "https://admin:admin@localhost:9200",
-            "oss_app_url": LOCALHOST_APP
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
+        },
+        {
+            "index": "scava-recommendations",
+            "category": "recommendation",
+            "bulk-size": BULK_SIZE,
+            "es_url": ES_URL,
+            "oss_app_url": APP_URL
         }
     ]
 
@@ -1078,7 +1133,7 @@ if __name__ == '__main__':
         elastic = __init_index(elastic_url, index, 10)
         elastic.max_items_bulk = min(bulk_size, elastic.max_items_bulk)
 
-        scava_data = fetch_scava(url, None, category, None)
+        scava_data = fetch_scava(url, None, category, RECOMMENDATION_URL)
 
         if scava_data:
             logging.info("Uploading Scava data to Elasticsearch")

@@ -826,12 +826,6 @@ def fetch_scava(url_api_rest, project=None, category=CATEGORY_METRIC, recommenda
         for project_scava in scava.fetch():
 
             project_shortname = project_scava['data']['shortName']
-
-            if project_shortname not in ['grimoirelabperceval', 'grimoirelabkibiter', 'grimoirelabpercevalmozilla',
-                                         'grimoirelabpercevalopnfv', 'grimoirelabpercevalpuppet', 'grimoirelabgraal',
-                                         'grimoirelabsirmordred']:
-                continue
-
             scavaProject = Scava(url=url_api_rest, project=project_shortname, recommendation_url=recommendation_url)
 
             prj_descr = project_scava['data']['description'] if 'description' in project_scava['data'] else None
